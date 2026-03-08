@@ -19,12 +19,17 @@ import androidx.compose.ui.unit.*
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
+import org.jetbrains.compose.resources.painterResource
+import androidx.compose.ui.layout.ContentScale
+import tugas3_profileapp.composeapp.generated.resources.Res
+import tugas3_profileapp.composeapp.generated.resources.profil
+
 
 // ╔══════════════════════════════════════════╗
 //  COMPOSABLE 1 — HeroSection
 //  Padanan: <div class="hero"> di HTML
 //  Berisi: gradient bg + grid overlay + back btn
-//          + badge + nama + verified tick
+//          + badge + foto profil (Image) + nama
 // ╚══════════════════════════════════════════╝
 @Composable
 fun HeroSection(
@@ -50,7 +55,7 @@ fun HeroSection(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(300.dp)
+            .height(350.dp) // Sedikit ditinggikan agar foto muat
             .clipToBounds()
     ) {
         // ── Layer 1: hero-bg gradient ──
@@ -86,7 +91,6 @@ fun HeroSection(
                 .fillMaxSize()
                 .graphicsLayer { alpha = meshAlpha }
         ) {
-            // radial blob violet di 30% 40%
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(Color(0xFF7C6EFA).copy(alpha = 0.45f), Color.Transparent),
@@ -94,7 +98,6 @@ fun HeroSection(
                     radius = size.width * 0.5f
                 )
             )
-            // radial blob pink di 75% 60%
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(Color(0xFFF472B6).copy(alpha = 0.35f), Color.Transparent),
@@ -102,7 +105,6 @@ fun HeroSection(
                     radius = size.width * 0.45f
                 )
             )
-            // radial blob sky di 55% 25%
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(Color(0xFF38BDF8).copy(alpha = 0.30f), Color.Transparent),
@@ -156,7 +158,7 @@ fun HeroSection(
             Text("‹", fontSize = 20.sp, color = GlassTheme.TextPrimary)
         }
 
-        // ── Badge + Nama (bottom-start) ──
+        // ── Profil Info (Foto + Badge + Nama) ──
         AnimatedVisibility(
             visible = visible,
             enter = fadeIn(tween(700)) + slideInVertically(tween(700)) { 16 },
@@ -164,7 +166,19 @@ fun HeroSection(
                 .align(Alignment.BottomStart)
                 .padding(start = 22.dp, end = 22.dp, bottom = 18.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+
+                // ── MENGGUNAKAN KOMPONEN IMAGE (Syarat Tugas) ──
+                Image(
+                    painter = painterResource(Res.drawable.profil),
+                    contentDescription = "Foto Profil",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape)
+                        .border(2.dp, Color.White.copy(alpha = 0.6f), CircleShape)
+                )
+
                 // Badge
                 Box(
                     modifier = Modifier
@@ -192,7 +206,6 @@ fun HeroSection(
                         lineHeight = 32.sp
                     )
                     Spacer(Modifier.width(6.dp))
-                    // Verified tick — lingkaran gradient violet→sky
                     Box(
                         modifier = Modifier
                             .size(22.dp)
