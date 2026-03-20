@@ -1,28 +1,78 @@
-package org.garis.pam
+package org.garis.pam.ui
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.*
-import androidx.compose.ui.draw.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import org.garis.pam.GlassTheme
+import org.jetbrains.compose.resources.painterResource
+import tugas3_profileapp.composeapp.generated.resources.Res
+import tugas3_profileapp.composeapp.generated.resources.profil
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
-import org.jetbrains.compose.resources.painterResource
-import androidx.compose.ui.layout.ContentScale
-import tugas3_profileapp.composeapp.generated.resources.Res
-import tugas3_profileapp.composeapp.generated.resources.profil
 
 
 // ╔══════════════════════════════════════════╗
@@ -80,7 +130,7 @@ fun HeroSection(
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        listOf(GlassTheme.BgHeroTop, GlassTheme.BgPhone)
+                        listOf(GlassTheme.colors.BgHeroTop, GlassTheme.colors.BgPhone)
                     )
                 )
         )
@@ -114,10 +164,12 @@ fun HeroSection(
             )
         }
 
-        // ── Layer 3: hero-grid (garis kotak-kotak tipis) ──
+        // ── Layer 3: hero-grid ──
+        val lineColor = GlassTheme.colors.TextPrimary.copy(alpha = 0.04f) // ← PINDAH KE SINI
+
         Canvas(modifier = Modifier.fillMaxSize()) {
             val gridSize = 32.dp.toPx()
-            val lineColor = Color.White.copy(alpha = 0.04f)
+            // lineColor sudah tersedia karena diambil di luar Canvas
             var x = 0f
             while (x <= size.width) {
                 drawLine(lineColor, Offset(x, 0f), Offset(x, size.height), strokeWidth = 1f)
@@ -138,7 +190,7 @@ fun HeroSection(
                 .align(Alignment.BottomCenter)
                 .background(
                     Brush.verticalGradient(
-                        listOf(Color.Transparent, GlassTheme.BgPhone.copy(alpha = 0.95f))
+                        listOf(Color.Transparent, GlassTheme.colors.BgPhone.copy(alpha = 0.95f))
                     )
                 )
         )
@@ -150,12 +202,12 @@ fun HeroSection(
                 .size(36.dp)
                 .align(Alignment.TopStart)
                 .clip(CircleShape)
-                .border(1.dp, GlassTheme.GlassBorder, CircleShape)
+                .border(1.dp, GlassTheme.colors.GlassBorder, CircleShape)
                 .background(Color.White.copy(alpha = 0.08f))
                 .clickable { },
             contentAlignment = Alignment.Center
         ) {
-            Text("‹", fontSize = 20.sp, color = GlassTheme.TextPrimary)
+            Text("‹", fontSize = 20.sp, color = GlassTheme.colors.TextPrimary)
         }
 
         // ── Profil Info (Foto + Badge + Nama) ──
@@ -191,7 +243,7 @@ fun HeroSection(
                         text = badge,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Medium,
-                        color = GlassTheme.Gold,
+                        color = GlassTheme.colors.Gold,
                         letterSpacing = 0.5.sp
                     )
                 }
@@ -202,7 +254,7 @@ fun HeroSection(
                         text = name,
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
-                        color = GlassTheme.TextPrimary,
+                        color = GlassTheme.colors.TextPrimary,
                         lineHeight = 32.sp
                     )
                     Spacer(Modifier.width(6.dp))
@@ -212,12 +264,12 @@ fun HeroSection(
                             .clip(CircleShape)
                             .background(
                                 Brush.linearGradient(
-                                    listOf(GlassTheme.Violet, GlassTheme.Sky)
+                                    listOf(GlassTheme.colors.Violet, GlassTheme.colors.Sky)
                                 )
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("✓", fontSize = 10.sp, color = Color.White)
+                        Text("✓", fontSize = 10.sp, color = GlassTheme.colors.TextPrimary)
                     }
                 }
             }
@@ -233,126 +285,77 @@ fun HeroSection(
 @Composable
 fun StatsAndActions(
     subtitle: String,
-    onMessageClick: () -> Unit = {},
-    onAddContactClick: () -> Unit = {},
-    modifier: Modifier = Modifier
+    isDarkMode: Boolean,
+    onToggleDark: () -> Unit,
+    onEditClick: () -> Unit,         // ← tombol edit FAB diganti ke sini
 ) {
-    Column(modifier = modifier.padding(horizontal = 20.dp)) {
+    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
 
-        // ── Stats row ──
+        // Stats row — sama seperti sebelumnya
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 18.dp),
+            modifier = Modifier.fillMaxWidth().padding(vertical = 18.dp),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
             StatItem("Smtr 6", "Semester")
-            // Divider vertikal
-            Box(
-                modifier = Modifier
-                    .width(1.dp)
-                    .height(36.dp)
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                Color.Transparent,
-                                GlassTheme.GlassBorder,
-                                Color.Transparent
-                            )
-                        )
-                    )
-            )
+            Box(modifier = Modifier.width(1.dp).height(36.dp)
+                .background(Brush.verticalGradient(
+                    listOf(Color.Transparent, GlassTheme.colors.GlassBorder, Color.Transparent))))
             StatItem("KMP", "Spesialisasi")
-            Box(
-                modifier = Modifier
-                    .width(1.dp)
-                    .height(36.dp)
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                Color.Transparent,
-                                GlassTheme.GlassBorder,
-                                Color.Transparent
-                            )
-                        )
-                    )
-            )
+            Box(modifier = Modifier.width(1.dp).height(36.dp)
+                .background(Brush.verticalGradient(
+                    listOf(Color.Transparent, GlassTheme.colors.GlassBorder, Color.Transparent))))
             StatItem("ITERA", "Kampus")
         }
 
-        // Garis bawah stats
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(GlassTheme.GlassBorder2)
-        )
+        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(GlassTheme.colors.GlassBorder2))
 
-        // ── Subtitle ──
         Text(
             text = subtitle,
-            fontSize = 13.sp,
-            color = GlassTheme.TextSecond,
-            textAlign = TextAlign.Center,
-            letterSpacing = 0.2.sp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 14.dp)
+            fontSize = 13.sp, color = GlassTheme.colors.TextSecond,
+            textAlign = TextAlign.Center, letterSpacing = 0.2.sp,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp)
         )
 
-        // ── Action buttons ──
+        // Action buttons row
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // btn-primary: gradient violet → pink
+            // Tombol Edit Profile
             Button(
-                onClick = onMessageClick,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(44.dp),
+                onClick = onEditClick,
+                modifier = Modifier.weight(1f).height(44.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                 contentPadding = PaddingValues(0.dp)
             ) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
+                    modifier = Modifier.fillMaxSize()
                         .background(
-                            Brush.linearGradient(
-                                listOf(GlassTheme.Violet, GlassTheme.Pink)
-                            ),
+                            Brush.linearGradient(listOf(GlassTheme.colors.Violet, GlassTheme.colors.Pink)),
                             RoundedCornerShape(14.dp)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        "✉ Kirim Pesan",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color.White
-                    )
+                    Text("✏ Edit Profil", fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold, color = GlassTheme.colors.TextPrimary)
                 }
             }
 
-            // btn-secondary: glass
+            // Tombol Dark Mode Toggle (BONUS)
             OutlinedButton(
-                onClick = onAddContactClick,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(44.dp),
+                onClick = onToggleDark,
+                modifier = Modifier.weight(1f).height(44.dp),
                 shape = RoundedCornerShape(14.dp),
-                border = BorderStroke(1.dp, GlassTheme.GlassBorder),
+                border = BorderStroke(1.dp, GlassTheme.colors.GlassBorder),
                 colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = GlassTheme.GlassBg
+                    containerColor = GlassTheme.colors.GlassBg
                 )
             ) {
                 Text(
-                    "⊕ Tambah Kontak",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = GlassTheme.TextPrimary
+                    if (isDarkMode) "☀ Light Mode" else "🌙 Dark Mode",
+                    fontSize = 13.sp, color = GlassTheme.colors.TextPrimary
                 )
             }
         }
@@ -368,12 +371,12 @@ private fun StatItem(value: String, label: String) {
             text = value,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = GlassTheme.TextPrimary
+            color = GlassTheme.colors.TextPrimary
         )
         Text(
             text = label,
             fontSize = 11.sp,
-            color = GlassTheme.TextMuted,
+            color = GlassTheme.colors.TextMuted,
             letterSpacing = 0.4.sp,
             modifier = Modifier.padding(top = 2.dp)
         )
@@ -419,7 +422,7 @@ fun ContactSection(
                             brush = Brush.linearGradient(
                                 listOf(Color(0xFFA78BFA), Color(0xFF7C6EFA))
                             ),
-                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(6f, 6f)
+                            cornerRadius = CornerRadius(6f, 6f)
                         )
                         // garis V di atas
                         drawLine(
@@ -436,12 +439,12 @@ fun ContactSection(
                 Text(
                     "EMAIL",
                     fontSize = 10.sp, fontWeight = FontWeight.SemiBold,
-                    color = Color.White.copy(alpha = 0.75f), letterSpacing = 0.8.sp
+                    color = GlassTheme.colors.TextPrimary.copy(alpha = 0.75f), letterSpacing = 0.8.sp
                 )
                 Text(
                     email,
                     fontSize = 12.sp, fontWeight = FontWeight.Medium,
-                    color = Color.White,
+                    color = GlassTheme.colors.TextPrimary,
                     lineHeight = 18.sp
                 )
             }
@@ -462,7 +465,7 @@ fun ContactSection(
                             brush = Brush.linearGradient(
                                 listOf(Color(0xFF2DD4BF), Color(0xFF38BDF8))
                             ),
-                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(8f, 8f)
+                            cornerRadius = CornerRadius(8f, 8f)
                         )
                         drawCircle(Color.White, radius = h * 0.08f,
                             center = Offset(w / 2f, h * 0.82f))
@@ -477,12 +480,12 @@ fun ContactSection(
                 Text(
                     "TELEPON",
                     fontSize = 10.sp, fontWeight = FontWeight.SemiBold,
-                    color = Color.White.copy(alpha = 0.75f), letterSpacing = 0.8.sp
+                    color = GlassTheme.colors.TextPrimary.copy(alpha = 0.75f), letterSpacing = 0.8.sp
                 )
                 Text(
                     phone,
                     fontSize = 12.sp, fontWeight = FontWeight.Medium,
-                    color = Color.White
+                    color = GlassTheme.colors.TextPrimary
                 )
             }
         }
@@ -506,7 +509,7 @@ fun ContactSection(
                     // Pin location icon
                     Canvas(modifier = Modifier.size(20.dp)) {
                         val cx = size.width / 2f
-                        val path = androidx.compose.ui.graphics.Path().apply {
+                        val path = Path().apply {
                             moveTo(cx, size.height)
                             cubicTo(
                                 cx - size.width * 0.5f, size.height * 0.65f,
@@ -536,17 +539,17 @@ fun ContactSection(
                     Text(
                         "LOKASI",
                         fontSize = 10.sp, fontWeight = FontWeight.SemiBold,
-                        color = Color.White.copy(alpha = 0.75f), letterSpacing = 1.sp
+                        color = GlassTheme.colors.TextPrimary.copy(alpha = 0.75f), letterSpacing = 1.sp
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
                         location,
                         fontSize = 14.sp, fontWeight = FontWeight.Medium,
-                        color = Color.White,
+                        color = GlassTheme.colors.TextPrimary,
                         maxLines = 1, overflow = TextOverflow.Ellipsis
                     )
                 }
-                Text("›", fontSize = 18.sp, color = GlassTheme.TextMuted)
+                Text("›", fontSize = 18.sp, color = GlassTheme.colors.TextMuted)
             }
         }
     }
@@ -599,7 +602,7 @@ fun BioCard(bio: String, modifier: Modifier = Modifier) {
                                 center = Offset(cx, size.height * 0.30f)
                             )
                             // badan
-                            val bodyPath = androidx.compose.ui.graphics.Path().apply {
+                            val bodyPath = Path().apply {
                                 moveTo(0f, size.height)
                                 cubicTo(
                                     0f, size.height * 0.60f,
@@ -624,7 +627,7 @@ fun BioCard(bio: String, modifier: Modifier = Modifier) {
                         "Bio",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = GlassTheme.TextPrimary
+                        color = GlassTheme.colors.TextPrimary
                     )
                 }
 
@@ -633,15 +636,15 @@ fun BioCard(bio: String, modifier: Modifier = Modifier) {
                     modifier = Modifier
                         .size(28.dp)
                         .clip(CircleShape)
-                        .border(1.dp, GlassTheme.GlassBorder, CircleShape)
-                        .background(GlassTheme.GlassBg)
+                        .border(1.dp, GlassTheme.colors.GlassBorder, CircleShape)
+                        .background(GlassTheme.colors.GlassBg)
                         .clickable { expanded = !expanded },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         "▲",
                         fontSize = 10.sp,
-                        color = GlassTheme.TextMuted,
+                        color = GlassTheme.colors.TextMuted,
                         modifier = Modifier.graphicsLayer { rotationZ = arrowRotation }
                     )
                 }
@@ -659,7 +662,7 @@ fun BioCard(bio: String, modifier: Modifier = Modifier) {
                         bio,
                         fontSize = 13.5.sp,
                         lineHeight = 22.sp,
-                        color = GlassTheme.TextSecond,
+                        color = GlassTheme.colors.TextSecond,
                         fontWeight = FontWeight.Light
                     )
                     Spacer(Modifier.height(12.dp))
@@ -701,7 +704,7 @@ fun SkillsGrid(modifier: Modifier = Modifier) {
             ) {
                 // Kotlin K logo shape
                 Canvas(modifier = Modifier.size(22.dp)) {
-                    val path = androidx.compose.ui.graphics.Path().apply {
+                    val path = Path().apply {
                         moveTo(0f, 0f)
                         lineTo(size.width, 0f)
                         lineTo(size.width / 2f, size.height / 2f)
@@ -731,7 +734,7 @@ fun SkillsGrid(modifier: Modifier = Modifier) {
                     // hexagon
                     val cx = size.width / 2f; val cy = size.height / 2f
                     val r = size.width / 2f
-                    val path = androidx.compose.ui.graphics.Path().apply {
+                    val path = Path().apply {
                         for (i in 0..5) {
                             val angle = ((60.0 * i) - 30.0) * (PI / 180.0) // Rumus manual toRadians
                             val x = (cx + r * cos(angle)).toFloat()
@@ -761,7 +764,7 @@ fun SkillsGrid(modifier: Modifier = Modifier) {
             ) {
                 Canvas(modifier = Modifier.size(22.dp)) {
                     // rumah / gedung kampus
-                    val path = androidx.compose.ui.graphics.Path().apply {
+                    val path = Path().apply {
                         moveTo(0f, size.height)
                         lineTo(0f, size.height * 0.45f)
                         lineTo(size.width / 2f, 0f)
@@ -778,7 +781,7 @@ fun SkillsGrid(modifier: Modifier = Modifier) {
                     drawRect(
                         Color.White.copy(alpha = 0.7f),
                         topLeft = Offset(size.width * 0.35f, size.height * 0.58f),
-                        size = androidx.compose.ui.geometry.Size(
+                        size = Size(
                             size.width * 0.30f, size.height * 0.42f
                         )
                     )
@@ -811,7 +814,7 @@ private fun SkillChip(
                 label,
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Medium,
-                color = GlassTheme.TextSecond,
+                color = GlassTheme.colors.TextSecond,
                 letterSpacing = 0.3.sp
             )
         }
@@ -825,27 +828,27 @@ private fun SkillChip(
 @Composable
 fun BottomNav(modifier: Modifier = Modifier) {
     var selected by remember { mutableStateOf(0) }
+    val navItems = listOf("🏠" to "Home", "🔍" to "Cari", "❤" to "Simpan", "☰" to "Menu")
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(GlassTheme.BgPhone.copy(alpha = 0.6f))
+            .background(GlassTheme.colors.BgPhone.copy(alpha = 0.85f))
             .border(
                 width = 1.dp,
-                color = GlassTheme.GlassBorder2,
+                color = GlassTheme.colors.GlassBorder2,
                 shape = RoundedCornerShape(0.dp)
             )
-            .padding(horizontal = 8.dp, vertical = 12.dp),
+            .padding(horizontal = 8.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val navItems = listOf("🏠" to "Home", "🔍" to "Cari", "❤" to "Simpan", "☰" to "Menu")
         navItems.forEachIndexed { index, (icon, label) ->
             NavItem(
-                icon = icon,
-                label = label,
+                icon     = icon,
+                label    = label,
                 isActive = selected == index,
-                onClick = { selected = index }
+                onClick  = { selected = index }
             )
         }
     }
@@ -858,44 +861,57 @@ private fun NavItem(
     isActive: Boolean,
     onClick: () -> Unit
 ) {
+    // Animasi scale saat aktif
+    val scale by animateFloatAsState(
+        targetValue = if (isActive) 1.08f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "navScale"
+    )
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 6.dp)
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .graphicsLayer { scaleX = scale; scaleY = scale }
     ) {
         Box(
             modifier = Modifier
                 .size(36.dp)
                 .clip(RoundedCornerShape(10.dp))
-                .then(
-                    if (isActive) Modifier.background(
+                .background(
+                    if (isActive)
                         Brush.linearGradient(
                             listOf(
-                                GlassTheme.Violet.copy(alpha = 0.4f),
-                                GlassTheme.Lavender.copy(alpha = 0.2f)
+                                GlassTheme.colors.Violet.copy(alpha = 0.45f),
+                                GlassTheme.colors.Lavender.copy(alpha = 0.25f)
                             )
                         )
-                    ).border(
-                        1.dp,
-                        GlassTheme.Violet.copy(alpha = 0.35f),
-                        RoundedCornerShape(10.dp)
-                    )
-                    else Modifier.background(GlassTheme.GlassBg)
-                        .border(1.dp, GlassTheme.GlassBorder2, RoundedCornerShape(10.dp))
+                    else
+                        Brush.linearGradient(
+                            listOf(GlassTheme.colors.GlassBg, GlassTheme.colors.GlassBg)
+                        )
+                )
+                .border(
+                    1.dp,
+                    if (isActive) GlassTheme.colors.Violet.copy(alpha = 0.5f)
+                    else GlassTheme.colors.GlassBorder2,
+                    RoundedCornerShape(10.dp)
                 ),
             contentAlignment = Alignment.Center
         ) {
             Text(icon, fontSize = 16.sp)
         }
         Spacer(Modifier.height(4.dp))
-        Text(
-            label,
-            fontSize = 10.sp,
-            color = if (isActive) GlassTheme.Lavender else GlassTheme.TextMuted,
-            letterSpacing = 0.3.sp
+        // Animasi warna label
+        val labelColor by animateColorAsState(
+            targetValue = if (isActive) GlassTheme.colors.Lavender
+            else GlassTheme.colors.TextMuted,
+            animationSpec = tween(200),
+            label = "labelColor"
         )
+        Text(label, fontSize = 10.sp, color = labelColor, letterSpacing = 0.3.sp)
     }
 }
 
@@ -911,8 +927,8 @@ fun GlassCard(
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(18.dp))
-            .border(1.dp, GlassTheme.GlassBorder, RoundedCornerShape(18.dp))
-            .background(GlassTheme.GlassBg)
+            .border(1.dp, GlassTheme.colors.GlassBorder, RoundedCornerShape(18.dp))
+            .background(GlassTheme.colors.GlassBg)
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -963,7 +979,7 @@ fun GlassDivider() {
         modifier = Modifier
             .fillMaxWidth()
             .height(1.dp)
-            .background(GlassTheme.GlassBorder2)
+            .background(GlassTheme.colors.GlassBorder2)
     )
     Spacer(Modifier.height(10.dp))
 }
@@ -973,15 +989,15 @@ private fun GlassTag(label: String) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(20.dp))
-            .border(1.dp, GlassTheme.GlassBorder, RoundedCornerShape(20.dp))
-            .background(GlassTheme.GlassBg)
+            .border(1.dp, GlassTheme.colors.GlassBorder, RoundedCornerShape(20.dp))
+            .background(GlassTheme.colors.GlassBg)
             .padding(horizontal = 10.dp, vertical = 4.dp)
     ) {
         Text(
             label,
             fontSize = 10.sp,
             fontWeight = FontWeight.Medium,
-            color = GlassTheme.TextSecond
+            color = GlassTheme.colors.TextSecond
         )
     }
 }
@@ -992,8 +1008,30 @@ private fun SectionLabel(text: String) {
         text = text.uppercase(),
         fontSize = 11.sp,
         fontWeight = FontWeight.SemiBold,
-        color = GlassTheme.TextMuted,
+        color = GlassTheme.colors.TextMuted,
         letterSpacing = 1.2.sp,
         modifier = Modifier.padding(bottom = 12.dp, top = 4.dp)
+    )
+}
+
+@Composable
+fun AnimatedButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit
+) {
+    var pressed by remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(
+        targetValue = if (pressed) 0.94f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "btnScale"
+    )
+    Box(
+        modifier = modifier
+            .graphicsLayer { scaleX = scale; scaleY = scale }
+            .clickable {
+                onClick()
+            },
+        content = content
     )
 }

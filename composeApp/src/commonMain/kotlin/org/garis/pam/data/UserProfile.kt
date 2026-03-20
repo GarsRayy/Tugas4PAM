@@ -1,4 +1,4 @@
-package org.garis.pam
+package org.garis.pam.data
 
 data class UserProfile(
     val name: String,
