@@ -163,7 +163,7 @@ implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:2.8
 
 ## 📸 Screenshot
 
-> *Tambahkan screenshot aplikasi di sini setelah build*
+> Ini SS APKnya
 
 | Dark Mode | Light Mode | Edit Profile |
 |---|---|---|
