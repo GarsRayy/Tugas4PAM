@@ -171,8 +171,14 @@ fun AppNavigation(
                 EditProfileScreen(
                     editName     = profileUiState.editName,
                     editBio      = profileUiState.editBio,
+                    editEmail    = profileUiState.editEmail,
+                    editPhone    = profileUiState.editPhone,
+                    editLocation = profileUiState.editLocation,
                     onNameChange = profileViewModel::onNameChange,
                     onBioChange  = profileViewModel::onBioChange,
+                    onEmailChange = profileViewModel::onEmailChange,
+                    onPhoneChange = profileViewModel::onPhoneChange,
+                    onLocationChange = profileViewModel::onLocationChange,
                     onSave       = {
                         profileViewModel.saveProfile()
                         navController.popBackStack()

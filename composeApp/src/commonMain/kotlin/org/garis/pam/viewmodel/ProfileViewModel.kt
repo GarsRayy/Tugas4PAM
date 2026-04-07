@@ -15,7 +15,10 @@ data class ProfileUiState(
     val isEditing: Boolean   = false,     // Apakah sedang di mode edit
     // Field sementara saat edit (state hoisting dari form)
     val editName: String     = myProfile.name,
-    val editBio: String      = myProfile.bio
+    val editBio: String      = myProfile.bio,
+    val editEmail: String    = myProfile.email,
+    val editPhone: String    = myProfile.phone,
+    val editLocation: String = myProfile.location
 )
 
 // ── ViewModel (sesuai materi hal 24) ──
@@ -38,19 +41,32 @@ class ProfileViewModel : ViewModel() {
             currentState.copy(
                 isEditing = true,
                 editName  = currentState.profile.name,
-                editBio   = currentState.profile.bio
+                editBio   = currentState.profile.bio,
+                editEmail = currentState.profile.email,
+                editPhone = currentState.profile.phone,
+                editLocation = currentState.profile.location
             )
         }
     }
 
-    // ── Event: update field nama saat diketik (state hoisting) ──
     fun onNameChange(newName: String) {
         _uiState.update { it.copy(editName = newName) }
     }
 
-    // ── Event: update field bio saat diketik (state hoisting) ──
     fun onBioChange(newBio: String) {
         _uiState.update { it.copy(editBio = newBio) }
+    }
+
+    fun onEmailChange(newEmail: String) {
+        _uiState.update { it.copy(editEmail = newEmail) }
+    }
+
+    fun onPhoneChange(newPhone: String) {
+        _uiState.update { it.copy(editPhone = newPhone) }
+    }
+
+    fun onLocationChange(newLocation: String) {
+        _uiState.update { it.copy(editLocation = newLocation) }
     }
 
     // ── Event: simpan perubahan ──
@@ -59,7 +75,10 @@ class ProfileViewModel : ViewModel() {
             currentState.copy(
                 profile = currentState.profile.copy(
                     name = currentState.editName.ifBlank { currentState.profile.name },
-                    bio  = currentState.editBio.ifBlank  { currentState.profile.bio }
+                    bio  = currentState.editBio.ifBlank  { currentState.profile.bio },
+                    email = currentState.editEmail.ifBlank { currentState.profile.email },
+                    phone = currentState.editPhone.ifBlank { currentState.profile.phone },
+                    location = currentState.editLocation.ifBlank { currentState.profile.location }
                 ),
                 isEditing = false
             )
