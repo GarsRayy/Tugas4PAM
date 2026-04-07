@@ -59,7 +59,6 @@ fun ProfileScreen(
                 SkillsGrid()
                 Spacer(Modifier.height(20.dp))
             }
-            BottomNav()
         }
     }
 }

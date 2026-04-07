@@ -71,8 +71,9 @@ import org.jetbrains.compose.resources.painterResource
 import tugas3_profileapp.composeapp.generated.resources.Res
 import tugas3_profileapp.composeapp.generated.resources.profil
 import kotlin.math.PI
-import kotlin.math.cos
+import androidx.compose.animation.core.LinearEasing
 import kotlin.math.sin
+import kotlin.math.cos
 
 
 // ╔══════════════════════════════════════════╗
@@ -90,187 +91,175 @@ fun HeroSection(
     var visible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { visible = true }
 
-    // Animasi mesh pulse (opacity 0.8 → 1.0)
-    val infiniteTransition = rememberInfiniteTransition(label = "mesh")
-    val meshAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.8f,
-        targetValue  = 1.0f,
+    val infiniteTransition = rememberInfiniteTransition(label = "hero")
+
+    // Satu float untuk menggerakkan semua partikel bersama
+    val particleTime by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue  = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(6000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "meshAlpha"
+            tween(12000, easing = LinearEasing),
+            RepeatMode.Restart
+        ), label = "particleTime"
     )
 
+    // Pulse untuk dot partikel
+    val dotPulse by infiniteTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue  = 1f,
+        animationSpec = infiniteRepeatable(
+            tween(2000, easing = FastOutSlowInEasing),
+            RepeatMode.Reverse
+        ), label = "dotPulse"
+    )
+
+    // Posisi 14 partikel (seed tetap, gerak berdasarkan particleTime)
+    val particleSeeds = remember {
+        listOf(
+            Triple(0.10f, 0.20f, 0.0f),  // x%, y%, phase offset
+            Triple(0.75f, 0.15f, 0.3f),
+            Triple(0.40f, 0.60f, 0.6f),
+            Triple(0.85f, 0.70f, 0.1f),
+            Triple(0.20f, 0.80f, 0.8f),
+            Triple(0.60f, 0.10f, 0.4f),
+            Triple(0.30f, 0.40f, 0.2f),
+            Triple(0.90f, 0.40f, 0.7f),
+            Triple(0.50f, 0.85f, 0.5f),
+            Triple(0.15f, 0.55f, 0.9f),
+            Triple(0.68f, 0.45f, 0.15f),
+            Triple(0.45f, 0.30f, 0.65f),
+            Triple(0.80f, 0.90f, 0.35f),
+            Triple(0.05f, 0.75f, 0.85f),
+        )
+    }
+
+    // Warna aksen partikel
+    val particleColors = remember {
+        listOf(
+            Color(0xFF7C6EFA), Color(0xFFA78BFA), Color(0xFFF472B6),
+            Color(0xFF2DD4BF), Color(0xFF38BDF8), Color(0xFFFCD34D),
+            Color(0xFF7C6EFA), Color(0xFF2DD4BF), Color(0xFFF472B6),
+            Color(0xFFA78BFA), Color(0xFF38BDF8), Color(0xFFFCD34D),
+            Color(0xFF7C6EFA), Color(0xFF2DD4BF),
+        )
+    }
+
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(350.dp) // Sedikit ditinggikan agar foto muat
-            .clipToBounds()
+        modifier = modifier.fillMaxWidth().height(300.dp).clipToBounds()
     ) {
-        // ── Layer 1: hero-bg gradient ──
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.linearGradient(
-                        colorStops = arrayOf(
-                            0.0f to Color(0xFF7C6EFA).copy(alpha = 0.6f),
-                            0.4f to Color(0xFFF472B6).copy(alpha = 0.4f),
-                            0.8f to Color(0xFF2DD4BF).copy(alpha = 0.3f),
-                            1.0f to Color.Transparent
-                        ),
-                        start = Offset(0f, 0f),
-                        end   = Offset(1000f, 1000f)
-                    )
-                )
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        listOf(GlassTheme.colors.BgHeroTop, GlassTheme.colors.BgPhone)
-                    )
-                )
+        // ── Layer 1: Gradient background ──
+        Box(modifier = Modifier.fillMaxSize()
+            .background(Brush.verticalGradient(
+                listOf(GlassTheme.colors.BgHeroTop, GlassTheme.colors.BgPhone)))
         )
 
-        // ── Layer 2: hero-mesh radial gradients ──
-        Canvas(
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer { alpha = meshAlpha }
-        ) {
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(Color(0xFF7C6EFA).copy(alpha = 0.45f), Color.Transparent),
-                    center = Offset(size.width * 0.30f, size.height * 0.40f),
-                    radius = size.width * 0.5f
-                )
-            )
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(Color(0xFFF472B6).copy(alpha = 0.35f), Color.Transparent),
-                    center = Offset(size.width * 0.75f, size.height * 0.60f),
-                    radius = size.width * 0.45f
-                )
-            )
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(Color(0xFF38BDF8).copy(alpha = 0.30f), Color.Transparent),
-                    center = Offset(size.width * 0.55f, size.height * 0.25f),
-                    radius = size.width * 0.38f
-                )
-            )
-        }
-
-        // ── Layer 3: hero-grid ──
-        val lineColor = GlassTheme.colors.TextPrimary.copy(alpha = 0.04f) // ← PINDAH KE SINI
-
+        // ── Layer 2: Particle network (Canvas) ──
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val gridSize = 32.dp.toPx()
-            // lineColor sudah tersedia karena diambil di luar Canvas
-            var x = 0f
-            while (x <= size.width) {
-                drawLine(lineColor, Offset(x, 0f), Offset(x, size.height), strokeWidth = 1f)
-                x += gridSize
+            val w = size.width
+            val h = size.height
+
+            // Hitung posisi aktual tiap partikel (bergerak sinusoidal)
+            val positions = particleSeeds.mapIndexed { i, (xSeed, ySeed, phase) ->
+                val t = (particleTime + phase) % 1f
+                val dx = kotlin.math.sin(t * 2 * Math.PI.toFloat()) * 30f
+                val dy = kotlin.math.cos(t * 2 * Math.PI.toFloat() * 0.7f) * 20f
+                Offset(xSeed * w + dx, ySeed * h + dy)
             }
-            var y = 0f
-            while (y <= size.height) {
-                drawLine(lineColor, Offset(0f, y), Offset(size.width, y), strokeWidth = 1f)
-                y += gridSize
+
+            // Gambar garis koneksi antar partikel yang berdekatan
+            for (i in positions.indices) {
+                for (j in i + 1 until positions.size) {
+                    val dist = (positions[i] - positions[j]).getDistance()
+                    val maxDist = w * 0.30f
+                    if (dist < maxDist) {
+                        val alpha = (1f - dist / maxDist) * 0.25f
+                        drawLine(
+                            color       = particleColors[i].copy(alpha = alpha),
+                            start       = positions[i],
+                            end         = positions[j],
+                            strokeWidth = 1f
+                        )
+                    }
+                }
+            }
+
+            // Gambar titik partikel
+            positions.forEachIndexed { i, pos ->
+                // Glow luar
+                drawCircle(
+                    color  = particleColors[i].copy(alpha = 0.15f * dotPulse),
+                    radius = 10f,
+                    center = pos
+                )
+                // Titik inti
+                drawCircle(
+                    color  = particleColors[i].copy(alpha = 0.7f * dotPulse),
+                    radius = 3f,
+                    center = pos
+                )
+            }
+
+            // Grid dots tipis sebagai tekstur
+            val gridStep = 36f
+            var gx = 0f
+            while (gx < w) {
+                var gy = 0f
+                while (gy < h) {
+                    drawCircle(
+                        color  = Color.White.copy(alpha = 0.04f),
+                        radius = 1f,
+                        center = Offset(gx, gy)
+                    )
+                    gy += gridStep
+                }
+                gx += gridStep
             }
         }
 
-        // ── Layer 4: bottom fade ──
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp)
-                .align(Alignment.BottomCenter)
-                .background(
-                    Brush.verticalGradient(
-                        listOf(Color.Transparent, GlassTheme.colors.BgPhone.copy(alpha = 0.95f))
-                    )
-                )
+        // ── Layer 3: Bottom fade ──
+        Box(modifier = Modifier.fillMaxWidth().height(120.dp)
+            .align(Alignment.BottomCenter)
+            .background(Brush.verticalGradient(
+                listOf(Color.Transparent,
+                    GlassTheme.colors.BgPhone.copy(alpha = 0.95f))))
         )
 
         // ── Back button ──
-        Box(
-            modifier = Modifier
-                .padding(18.dp)
-                .size(36.dp)
-                .align(Alignment.TopStart)
-                .clip(CircleShape)
-                .border(1.dp, GlassTheme.colors.GlassBorder, CircleShape)
-                .background(Color.White.copy(alpha = 0.08f))
-                .clickable { },
+        Box(modifier = Modifier.padding(18.dp).size(36.dp)
+            .align(Alignment.TopStart)
+            .clip(CircleShape)
+            .border(1.dp, GlassTheme.colors.GlassBorder, CircleShape)
+            .background(Color.White.copy(alpha = 0.08f))
+            .clickable { },
             contentAlignment = Alignment.Center
-        ) {
-            Text("‹", fontSize = 20.sp, color = GlassTheme.colors.TextPrimary)
-        }
+        ) { Text("‹", fontSize = 20.sp, color = GlassTheme.colors.TextPrimary) }
 
-        // ── Profil Info (Foto + Badge + Nama) ──
+        // ── Badge + Nama ──
         AnimatedVisibility(
             visible = visible,
-            enter = fadeIn(tween(700)) + slideInVertically(tween(700)) { 16 },
-            modifier = Modifier
-                .align(Alignment.BottomStart)
+            enter   = fadeIn(tween(700)) + slideInVertically(tween(700)) { 16 },
+            modifier = Modifier.align(Alignment.BottomStart)
                 .padding(start = 22.dp, end = 22.dp, bottom = 18.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-
-                // ── MENGGUNAKAN KOMPONEN IMAGE (Syarat Tugas) ──
-                Image(
-                    painter = painterResource(Res.drawable.profil),
-                    contentDescription = "Foto Profil",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape)
-                        .border(2.dp, Color.White.copy(alpha = 0.6f), CircleShape)
-                )
-
-                // Badge
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(20.dp))
-                        .background(Color.White.copy(alpha = 0.10f))
-                        .padding(horizontal = 12.dp, vertical = 4.dp)
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Box(modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(20.dp))
+                    .background(Color.White.copy(alpha = 0.10f))
+                    .padding(horizontal = 12.dp, vertical = 4.dp)
                 ) {
-                    Text(
-                        text = badge,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = GlassTheme.colors.Gold,
-                        letterSpacing = 0.5.sp
-                    )
+                    Text(badge, fontSize = 11.sp, fontWeight = FontWeight.Medium,
+                        color = GlassTheme.colors.Gold, letterSpacing = 0.5.sp)
                 }
-
-                // Nama + verified tick
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = name,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = GlassTheme.colors.TextPrimary,
-                        lineHeight = 32.sp
-                    )
+                    Text(name, fontSize = 28.sp, fontWeight = FontWeight.Bold,
+                        color = GlassTheme.colors.TextPrimary, lineHeight = 32.sp)
                     Spacer(Modifier.width(6.dp))
-                    Box(
-                        modifier = Modifier
-                            .size(22.dp)
-                            .clip(CircleShape)
-                            .background(
-                                Brush.linearGradient(
-                                    listOf(GlassTheme.colors.Violet, GlassTheme.colors.Sky)
-                                )
-                            ),
+                    Box(modifier = Modifier.size(22.dp).clip(CircleShape)
+                        .background(Brush.linearGradient(
+                            listOf(GlassTheme.colors.Violet, GlassTheme.colors.Sky))),
                         contentAlignment = Alignment.Center
-                    ) {
-                        Text("✓", fontSize = 10.sp, color = GlassTheme.colors.TextPrimary)
-                    }
+                    ) { Text("✓", fontSize = 10.sp, color = Color.White) }
                 }
             }
         }
@@ -825,95 +814,6 @@ private fun SkillChip(
 //  COMPOSABLE 6 — BottomNav
 //  Padanan: <div class="bottom-nav"> di HTML
 // ╚══════════════════════════════════════════╝
-@Composable
-fun BottomNav(modifier: Modifier = Modifier) {
-    var selected by remember { mutableStateOf(0) }
-    val navItems = listOf("🏠" to "Home", "🔍" to "Cari", "❤" to "Simpan", "☰" to "Menu")
-
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(GlassTheme.colors.BgPhone.copy(alpha = 0.85f))
-            .border(
-                width = 1.dp,
-                color = GlassTheme.colors.GlassBorder2,
-                shape = RoundedCornerShape(0.dp)
-            )
-            .padding(horizontal = 8.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.SpaceAround,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        navItems.forEachIndexed { index, (icon, label) ->
-            NavItem(
-                icon     = icon,
-                label    = label,
-                isActive = selected == index,
-                onClick  = { selected = index }
-            )
-        }
-    }
-}
-
-@Composable
-private fun NavItem(
-    icon: String,
-    label: String,
-    isActive: Boolean,
-    onClick: () -> Unit
-) {
-    // Animasi scale saat aktif
-    val scale by animateFloatAsState(
-        targetValue = if (isActive) 1.08f else 1f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "navScale"
-    )
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 6.dp)
-            .graphicsLayer { scaleX = scale; scaleY = scale }
-    ) {
-        Box(
-            modifier = Modifier
-                .size(36.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(
-                    if (isActive)
-                        Brush.linearGradient(
-                            listOf(
-                                GlassTheme.colors.Violet.copy(alpha = 0.45f),
-                                GlassTheme.colors.Lavender.copy(alpha = 0.25f)
-                            )
-                        )
-                    else
-                        Brush.linearGradient(
-                            listOf(GlassTheme.colors.GlassBg, GlassTheme.colors.GlassBg)
-                        )
-                )
-                .border(
-                    1.dp,
-                    if (isActive) GlassTheme.colors.Violet.copy(alpha = 0.5f)
-                    else GlassTheme.colors.GlassBorder2,
-                    RoundedCornerShape(10.dp)
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(icon, fontSize = 16.sp)
-        }
-        Spacer(Modifier.height(4.dp))
-        // Animasi warna label
-        val labelColor by animateColorAsState(
-            targetValue = if (isActive) GlassTheme.colors.Lavender
-            else GlassTheme.colors.TextMuted,
-            animationSpec = tween(200),
-            label = "labelColor"
-        )
-        Text(label, fontSize = 10.sp, color = labelColor, letterSpacing = 0.3.sp)
-    }
-}
 
 // ════════════════════════════════════════════
 //  PRIVATE HELPERS — shared building blocks
