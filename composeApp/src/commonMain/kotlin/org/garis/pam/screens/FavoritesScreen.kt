@@ -1,0 +1,92 @@
+package org.garis.pam.screens
+
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.*
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.*
+import org.garis.pam.GlassTheme
+import org.garis.pam.data.Note
+import org.garis.pam.screens.notes.NoteCard
+
+@Composable
+fun FavoritesScreen(
+    favorites: List<Note>,
+    onNoteClick: (Int) -> Unit,
+    onToggleFavorite: (Int) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    listOf(GlassTheme.colors.BgPage, GlassTheme.colors.BgPhone)
+                )
+            )
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 24.dp)
+        ) {
+            Column {
+                Text(
+                    "❤ Favorit",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = GlassTheme.colors.TextPrimary
+                )
+                Text(
+                    "${favorites.size} catatan favorit",
+                    fontSize = 13.sp,
+                    color = GlassTheme.colors.TextMuted,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+        }
+
+        if (favorites.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("🤍", fontSize = 48.sp)
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        "Belum ada catatan favorit",
+                        fontSize = 16.sp,
+                        color = GlassTheme.colors.TextMuted
+                    )
+                    Text(
+                        "Tap ❤ di catatan untuk menambahkan",
+                        fontSize = 13.sp,
+                        color = GlassTheme.colors.TextMuted,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+            }
+        } else {
+            LazyColumn(
+                contentPadding = PaddingValues(
+                    start = 16.dp, end = 16.dp,
+                    bottom = 100.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                items(favorites, key = { it.id }) { note ->
+                    NoteCard(
+                        note = note,
+                        onClick = { onNoteClick(note.id) },
+                        onToggleFavorite = { onToggleFavorite(note.id) }
+                    )
+                }
+            }
+        }
+    }
+}
