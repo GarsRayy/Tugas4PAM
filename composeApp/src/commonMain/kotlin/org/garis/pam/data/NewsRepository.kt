@@ -15,7 +15,7 @@ class NewsRepository(private val client: HttpClient) {
                 url {
                     // Parameter untuk request berita (contoh: negara US, kategori teknologi)
                     parameters.append("country", "us")
-                    parameters.append("category", "technology")
+                    parameters.append("category", "general")
                     parameters.append("apiKey", apiKey)
                 }
             }.body()

@@ -17,16 +17,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.kamel.image.KamelImage
+import io.kamel.image.asyncPainterResource
 import org.garis.pam.data.Article
 import org.garis.pam.viewmodel.NewsUiState
 import org.garis.pam.viewmodel.NewsViewModel
-import io.kamel.image.KamelImage
-import io.kamel.image.asyncPainterResource
-import androidx.compose.ui.layout.ContentScale
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -42,7 +42,6 @@ fun NewsListScreen(
         onRefresh = { viewModel.refresh() }
     )
 
-    // Background kanvas gelap untuk menonjolkan efek Glassmorphism
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -81,7 +80,7 @@ fun NewsListScreen(
                 ) {
                     Text(
                         text = "Error: ${state.message}",
-                        color = Color(0xFFF87171), // Red error color
+                        color = Color(0xFFF87171),
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                     Button(
@@ -94,7 +93,6 @@ fun NewsListScreen(
             }
         }
 
-        // Indikator Pull-to-refresh
         PullRefreshIndicator(
             refreshing = isRefreshing,
             state = pullRefreshState,
@@ -106,7 +104,6 @@ fun NewsListScreen(
 
 @Composable
 fun NewsItemGlassCard(article: Article, onClick: () -> Unit) {
-    // Card dengan efek Glassmorphism (semi-transparan dengan border/gradient halus)
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -132,6 +129,7 @@ fun NewsItemGlassCard(article: Article, onClick: () -> Unit) {
                 .padding(16.dp)
         ) {
             Column {
+                // ✅ PERBAIKAN: Hapus Box placeholder yang menutupi KamelImage
                 val imageUrl = article.urlToImage
                 if (imageUrl != null) {
                     KamelImage(
@@ -143,21 +141,35 @@ fun NewsItemGlassCard(article: Article, onClick: () -> Unit) {
                             .clip(RoundedCornerShape(12.dp)),
                         contentScale = ContentScale.Crop,
                         onLoading = {
-                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(180.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(Color.White.copy(alpha = 0.1f)),
+                                contentAlignment = Alignment.Center
+                            ) {
                                 CircularProgressIndicator(color = Color(0xFF38BDF8))
                             }
                         },
                         onFailure = {
                             Box(
-                                Modifier.fillMaxWidth().height(180.dp).background(Color.White.copy(alpha = 0.1f)),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(180.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(Color.White.copy(alpha = 0.1f)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text("Gagal memuat gambar", color = Color.White.copy(alpha = 0.5f))
+                                Text(
+                                    "Gagal memuat gambar",
+                                    color = Color.White.copy(alpha = 0.5f)
+                                )
                             }
                         }
                     )
                 } else {
-                    // Jika API tidak mengembalikan URL gambar
+                    // Placeholder jika API tidak mengembalikan URL gambar
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -169,6 +181,9 @@ fun NewsItemGlassCard(article: Article, onClick: () -> Unit) {
                         Text("Tidak ada gambar", color = Color.White.copy(alpha = 0.6f))
                     }
                 }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
                 Text(
                     text = article.title,
                     color = Color.White,
