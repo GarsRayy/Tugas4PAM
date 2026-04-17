@@ -4,8 +4,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Brush
@@ -17,6 +16,8 @@ import androidx.navigation.*
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.graphics.Color
 import org.garis.pam.GlassTheme
 import org.garis.pam.screens.FavoritesScreen
 import org.garis.pam.screens.notes.*
@@ -24,6 +25,11 @@ import org.garis.pam.ui.ProfileScreen
 import org.garis.pam.ui.EditProfileScreen
 import org.garis.pam.viewmodel.NoteViewModel
 import org.garis.pam.viewmodel.ProfileViewModel
+import org.garis.pam.data.NewsRepository
+import org.garis.pam.data.HttpClientFactory
+import org.garis.pam.viewmodel.NewsViewModel
+import org.garis.pam.screens.news.NewsListScreen
+import org.garis.pam.screens.news.NewsDetailScreen
 
 @Composable
 fun AppNavigation(
@@ -35,6 +41,8 @@ fun AppNavigation(
     val navController = rememberNavController()
     val noteUiState by noteViewModel.uiState.collectAsState()
     val profileUiState by profileViewModel.uiState.collectAsState()
+    val newsRepository = remember { NewsRepository(HttpClientFactory.create()) }
+    val newsViewModel: NewsViewModel = viewModel { NewsViewModel(newsRepository) }
 
     Scaffold(
         bottomBar = {
@@ -45,7 +53,8 @@ fun AppNavigation(
             val showBottomNav = currentRoute in listOf(
                 Screen.Notes.route,
                 Screen.Favorites.route,
-                Screen.Profile.route
+                Screen.Profile.route,
+                Screen.News.route
             )
             if (showBottomNav) {
                 GlassBottomNav(navController = navController)
@@ -55,7 +64,7 @@ fun AppNavigation(
     ) { paddingValues ->
 
         NavHost(
-            navController   = navController,
+            navController = navController,
             startDestination = Screen.Notes.route,
             modifier = Modifier.padding(paddingValues)
         ) {
@@ -83,17 +92,38 @@ fun AppNavigation(
                 )
             }
 
+            // ── TAB: News ──
+            composable(Screen.News.route) {
+                NewsListScreen(
+                    viewModel = newsViewModel,
+                    onNavigateToDetail = { article ->
+                        newsViewModel.selectArticle(article)
+                        navController.navigate(Screen.NewsDetail.route)
+                    }
+                )
+            }
+
             // ── TAB: Profile ──
             composable(Screen.Profile.route) {
                 ProfileScreen(
                     profile      = profileUiState.profile,
                     isDarkMode   = isDarkMode,
                     onEditClick  = {
-                        // ← INI yang harus ada, navigate ke route edit_profile
                         navController.navigate("edit_profile")
                     },
                     onToggleDark = onToggleDark
                 )
+            }
+
+            // ── News Detail ──
+            composable(Screen.NewsDetail.route) {
+                val article by newsViewModel.selectedArticle.collectAsState()
+                article?.let {
+                    NewsDetailScreen(
+                        article = it,
+                        onNavigateBack = { navController.popBackStack() }
+                    )
+                }
             }
 
             // ── Note Detail (dengan argument noteId) ──
@@ -199,6 +229,7 @@ fun GlassBottomNav(navController: NavController) {
     val items = listOf(
         Triple(Screen.Notes.route,     "📝", "Notes"),
         Triple(Screen.Favorites.route, "❤",  "Favorit"),
+        Triple(Screen.News.route,      "📰", "News"),
         Triple(Screen.Profile.route,   "👤", "Profil")
     )
 
@@ -230,7 +261,6 @@ fun GlassBottomNav(navController: NavController) {
                     .clip(RoundedCornerShape(12.dp))
                     .clickable {
                         navController.navigate(route) {
-                            // Sesuai materi: popUpTo + launchSingleTop
                             popUpTo(navController.graph.startDestinationId) {
                                 saveState = true
                             }
