@@ -169,23 +169,6 @@ fun NewsItemGlassCard(article: Article, onClick: () -> Unit) {
                         Text("Tidak ada gambar", color = Color.White.copy(alpha = 0.6f))
                     }
                 }
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White.copy(alpha = 0.15f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Area Gambar Artikel",
-                        color = Color.White.copy(alpha = 0.6f),
-                        fontSize = 12.sp
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
                 Text(
                     text = article.title,
                     color = Color.White,
