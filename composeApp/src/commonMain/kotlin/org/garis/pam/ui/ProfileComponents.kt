@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -161,8 +162,8 @@ fun HeroSection(
             // Hitung posisi aktual tiap partikel (bergerak sinusoidal)
             val positions = particleSeeds.mapIndexed { i, (xSeed, ySeed, phase) ->
                 val t = (particleTime + phase) % 1f
-                val dx = kotlin.math.sin(t * 2 * Math.PI.toFloat()) * 30f
-                val dy = kotlin.math.cos(t * 2 * Math.PI.toFloat() * 0.7f) * 20f
+                val dx = sin(t * 2 * PI.toFloat()) * 30f
+                val dy = cos(t * 2 * PI.toFloat() * 0.7f) * 20f
                 Offset(xSeed * w + dx, ySeed * h + dy)
             }
 
@@ -233,15 +234,58 @@ fun HeroSection(
             .clickable { },
             contentAlignment = Alignment.Center
         ) { Text("‹", fontSize = 20.sp, color = GlassTheme.colors.TextPrimary) }
-
-        // ── Badge + Nama ──
+        // ── Avatar, Badge + Nama ──
         AnimatedVisibility(
             visible = visible,
             enter   = fadeIn(tween(700)) + slideInVertically(tween(700)) { 16 },
             modifier = Modifier.align(Alignment.BottomStart)
                 .padding(start = 22.dp, end = 22.dp, bottom = 18.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                // ── Avatar circle ──
+                Box(
+                    modifier = Modifier.size(100.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    // Gradient ring
+                    Canvas(modifier = Modifier.fillMaxSize()) {
+                        drawCircle(
+                            brush = Brush.sweepGradient(
+                                listOf(
+                                    Color(0xFF7C6EFA), Color(0xFFF472B6),
+                                    Color(0xFF2DD4BF), Color(0xFFFCD34D),
+                                    Color(0xFF7C6EFA)
+                                )
+                            )
+                        )
+                        drawCircle(
+                            color = Color(0xFF0B0912),
+                            radius = size.minDimension / 2f - 3.dp.toPx()
+                        )
+                    }
+
+                    // Lingkaran avatar dengan Foto Profil
+                    Image(
+                        painter = painterResource(Res.drawable.profil),
+                        contentDescription = "Profile Picture",
+                        modifier = Modifier
+                            .size(84.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+
+                    // Online dot hijau
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .align(Alignment.BottomEnd)
+                            .offset((-6).dp, (-6).dp)
+                            .clip(CircleShape)
+                            .background(GlassTheme.colors.Green)
+                            .border(2.5.dp, Color(0xFF0B0912), CircleShape)
+                    )
+                }
+
                 Box(modifier = Modifier
                     .clip(RoundedCornerShape(20.dp))
                     .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(20.dp))

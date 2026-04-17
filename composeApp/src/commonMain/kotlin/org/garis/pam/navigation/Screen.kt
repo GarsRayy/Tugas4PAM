@@ -7,6 +7,8 @@ sealed class Screen(val route: String) {
     object Notes     : Screen("notes")
     object Favorites : Screen("favorites")
     object Profile   : Screen("profile")
+    object News : Screen("news")
+    object NewsDetail : Screen("news_detail")
 
     // ── Notes stack ──
     object NoteList   : Screen("note_list")

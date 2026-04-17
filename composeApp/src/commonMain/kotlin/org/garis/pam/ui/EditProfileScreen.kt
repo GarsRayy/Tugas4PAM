@@ -48,8 +48,14 @@ fun GlassTextField(
 fun EditProfileScreen(
     editName: String,
     editBio: String,
+    editEmail: String,
+    editPhone: String,
+    editLocation: String,
     onNameChange: (String) -> Unit,   // state hoisting ke ViewModel
     onBioChange: (String) -> Unit,    // state hoisting ke ViewModel
+    onEmailChange: (String) -> Unit,
+    onPhoneChange: (String) -> Unit,
+    onLocationChange: (String) -> Unit,
     onSave: () -> Unit,
     onCancel: () -> Unit
 ) {
@@ -75,7 +81,7 @@ fun EditProfileScreen(
             color = GlassTheme.colors.TextPrimary
         )
         Text(
-            "Ubah nama dan bio yang ditampilkan di profil",
+            "Ubah informasi profil Anda secara lengkap",
             fontSize = 13.sp,
             color = GlassTheme.colors.TextSecond
         )
@@ -94,7 +100,25 @@ fun EditProfileScreen(
             label = "Bio",
             value = editBio,
             onValueChange = onBioChange,
-            maxLines = 5
+            maxLines = 3
+        )
+
+        GlassTextField(
+            label = "Email",
+            value = editEmail,
+            onValueChange = onEmailChange
+        )
+
+        GlassTextField(
+            label = "Telepon",
+            value = editPhone,
+            onValueChange = onPhoneChange
+        )
+
+        GlassTextField(
+            label = "Lokasi",
+            value = editLocation,
+            onValueChange = onLocationChange
         )
 
         Spacer(Modifier.height(8.dp))
