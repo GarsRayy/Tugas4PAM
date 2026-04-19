@@ -1,15 +1,15 @@
-# 📱 Aurora Glass Notes App
+# 📰 News Reader App - Compose Multiplatform
 
 <div align="center">
 
 ![Kotlin](https://img.shields.io/badge/Kotlin-7C6EFA?style=for-the-badge&logo=kotlin&logoColor=white)
 ![Compose Multiplatform](https://img.shields.io/badge/Compose_Multiplatform-2DD4BF?style=for-the-badge&logo=jetpackcompose&logoColor=white)
-![Navigation](https://img.shields.io/badge/Navigation_Compose-F472B6?style=for-the-badge&logo=android&logoColor=white)
+![Ktor](https://img.shields.io/badge/Ktor-087CFA?style=for-the-badge&logo=ktor&logoColor=white)
 ![Android](https://img.shields.io/badge/Android-4ADE80?style=for-the-badge&logo=android&logoColor=white)
 ![Desktop](https://img.shields.io/badge/Desktop-38BDF8?style=for-the-badge&logo=windows&logoColor=white)
 
-**Tugas Praktikum Minggu 5 — IF25-22017 Pengembangan Aplikasi Mobile**
-Branch: `week-5` | Institut Teknologi Sumatera (ITERA) · Teknik Informatika 2023
+**Tugas Praktikum Minggu 6 — IF25-22017 Pengembangan Aplikasi Mobile**
+Branch: `week-6` | Institut Teknologi Sumatera (ITERA) · Teknik Informatika 2023
 
 </div>
 
@@ -29,35 +29,31 @@ Branch: `week-5` | Institut Teknologi Sumatera (ITERA) · Teknik Informatika 202
 
 ## 📋 Deskripsi Aplikasi
 
-**Aurora Glass Notes App** adalah pengembangan lanjutan dari Profile App minggu sebelumnya, kini dilengkapi dengan fitur **navigasi multi-screen** menggunakan **Navigation Compose** untuk Kotlin Multiplatform.
+**Aurora Glass News Reader** adalah pengembangan lanjutan dari Notes App minggu sebelumnya, kini dilengkapi dengan fitur **Networking & REST API** menggunakan **Ktor Client** untuk Kotlin Multiplatform.
 
-Aplikasi ini memiliki 3 tab utama yang terhubung via Bottom Navigation, dengan alur navigasi lengkap antar screen menggunakan `NavHost`, `NavController`, dan passing arguments antar destination.
+Aplikasi ini mengambil berita utama secara *real-time* dari [NewsAPI](https://newsapi.org/), menampilkannya dengan antarmuka **Aurora Glass / Glassmorphism** yang elegan, lengkap dengan penanganan state *Loading*, *Success*, dan *Error* secara reaktif berbasis `StateFlow`.
 
 ---
 
-## ✨ Fitur Minggu 5 — Navigation
+## ✨ Fitur Minggu 6 — Networking & REST API
 
-### Bottom Navigation (3 Tabs)
-- 📝 **Notes** — list semua catatan dengan FAB tambah catatan baru
-- ❤ **Favorites** — catatan yang ditandai favorit
-- 👤 **Profile** — halaman profil dari minggu 3 & 4 (reuse!)
+### REST API Integration
+- 🌐 **Top Headlines** — mengambil berita utama secara *real-time* dari NewsAPI
+- 🔄 **Pull-to-Refresh** — memperbarui umpan berita dengan gestur tarik ke bawah
+- 🚦 **Reactive State** — penanganan *Loading*, *Success*, dan *Error* berbasis `StateFlow`
+- 🔁 **Error Recovery** — tombol coba ulang saat koneksi gagal
 
-### Navigation Flow Lengkap
-- **Note List → Note Detail** — passing `noteId` sebagai required argument
-- **Note Detail → Edit Note** — passing `noteId` untuk edit
-- **FAB (+) → Add Note** — navigate ke form tambah catatan baru
-- **Profile → Edit Profile** — navigate ke form edit profil
+### Asynchronous Image Loading
+- 🖼️ **Coil 3 Multiplatform** — memuat gambar artikel secara asinkron dengan mulus
+- 🖼️ **Fallback Handler** — placeholder elegan jika gambar tidak tersedia atau gagal dimuat
+
+### Navigation Flow
+- **News List → News Detail** — navigasi ke halaman detail konten artikel penuh
 - **Back navigation** — `popBackStack()` dari semua screen detail
 
-### Fitur Notes
-- 📝 Buat catatan baru dengan judul dan isi
-- 👁 Lihat detail catatan lengkap
-- ✏️ Edit catatan yang sudah ada
-- 🗑 Hapus catatan
-- ❤ Toggle favorit per catatan
-- 🎨 5 warna aksen berbeda per catatan (Violet, Teal, Pink, Gold, Sky)
-
-### Bonus (+10%) — Navigation Drawer *(jika diimplementasikan)*
+### Design System
+- 🎨 **Aurora Glassmorphism** — tema kustom `GlassTheme` dengan efek kaca transparan
+- 🌙 **Dark / Light Mode** — desain adaptif sesuai preferensi sistem
 
 ---
 
@@ -66,34 +62,35 @@ Aplikasi ini memiliki 3 tab utama yang terhubung via Bottom Navigation, dengan a
 ```
 composeApp/src/commonMain/kotlin/org/garis/pam/
 │
-├── 📁 data/
-│   ├── UserProfile.kt          # Data class profil
-│   └── Note.kt                 # Data class note + NoteColor enum + sampleNotes
+├── 📁 data/                        ★ BARU MINGGU 6
+│   ├── Article.kt                  # Data class artikel dari API
+│   ├── NewsApiResponse.kt          # Data class response JSON (wrapper)
+│   └── NewsRepository.kt          # Repository — Ktor HTTP client & endpoint
 │
 ├── 📁 viewmodel/
-│   ├── ProfileViewModel.kt     # ViewModel profil + ProfileUiState
-│   └── NoteViewModel.kt        # ViewModel notes + NoteUiState
+│   ├── ProfileViewModel.kt         # ViewModel profil (reuse minggu 4)
+│   ├── NoteViewModel.kt            # ViewModel notes (reuse minggu 5)
+│   └── NewsViewModel.kt            ★ BARU MINGGU 6
+│                                   # ViewModel berita + NewsUiState
 │
-├── 📁 navigation/              ★ BARU MINGGU 5
-│   ├── Screen.kt               # Sealed class semua routes
-│   └── AppNavigation.kt        # NavHost + NavController + GlassBottomNav
+├── 📁 navigation/
+│   ├── Screen.kt                   # Sealed class semua routes (+ NewsDetail)
+│   └── AppNavigation.kt            # NavHost + NavController + BottomNav
 │
-├── 📁 screens/                 ★ BARU MINGGU 5
-│   ├── FavoritesScreen.kt      # Tab Favorites
-│   └── 📁 notes/
-│       ├── NoteListScreen.kt   # Daftar catatan + FAB
-│       ├── NoteDetailScreen.kt # Detail catatan + edit + delete
-│       └── AddEditNoteScreen.kt# Form tambah/edit catatan
+├── 📁 screens/
+│   ├── FavoritesScreen.kt
+│   └── 📁 news/                    ★ BARU MINGGU 6
+│       ├── NewsListScreen.kt       # Daftar artikel + Pull-to-Refresh + state
+│       ├── NewsDetailScreen.kt     # Konten artikel lengkap dengan gambar hero
+│       └── NewsComponents.kt       # GlassArticleCard, LoadingShimmer, ErrorView
 │
-├── 📁 ui/                      (dari minggu sebelumnya)
+├── 📁 ui/                          (dari minggu sebelumnya)
 │   ├── ProfileScreen.kt
 │   ├── ProfileComponents.kt
 │   └── EditProfileScreen.kt
 │
-├── 📁 components/              ★ BARU MINGGU 5
-│
-├── GlassTheme.kt               # Dynamic dark/light design tokens
-└── App.kt                      # Entry point + ViewModel + CompositionLocal
+├── GlassTheme.kt                   # Dynamic dark/light design tokens
+└── App.kt                          # Entry point + ViewModel + CompositionLocal
 ```
 
 ---
@@ -106,26 +103,25 @@ App Start
     ▼
 AppNavigation (NavHost)
     │
-    ├── [Bottom Nav Tab 1] Notes ──────────────────────────┐
-    │       │                                              │
-    │       ├── navigate("note_detail/{noteId}") ──► NoteDetailScreen
-    │       │                                              │
-    │       │   [Back] popBackStack() ◄────────────────────┤
-    │       │                                              │
-    │       │                          navigate("edit_note/{noteId}")
-    │       │                                              │
-    │       │                                    ▼
-    │       │                          EditNoteScreen
-    │       │                          [Save/Back] popBackStack()
+    ├── [Bottom Nav Tab 1] News ────────────────────────────┐
+    │       │                                               │
+    │       ├── [Loading State] ──► GlassShimmer Animation  │
+    │       │                                               │
+    │       ├── [Error State] ──► ErrorView + Retry Button  │
+    │       │                                               │
+    │       ├── [Success State] ──► ArticleCard List        │
+    │       │       │                                       │
+    │       │       └── navigate("news_detail/{articleUrl}")│
+    │       │                       │                       │
+    │       │                       ▼                       │
+    │       │               NewsDetailScreen                │
+    │       │               [Back] popBackStack() ◄─────────┘
     │       │
-    │       └── FAB navigate("add_note") ──► AddNoteScreen
-    │                                        [Save/Back] popBackStack()
+    │       └── Pull-to-Refresh ──► reload dari NewsRepository
     │
-    ├── [Bottom Nav Tab 2] Favorites
-    │       │
-    │       └── navigate("note_detail/{noteId}") ──► NoteDetailScreen
+    ├── [Bottom Nav Tab 2] Favorites  (reuse minggu 5)
     │
-    └── [Bottom Nav Tab 3] Profile
+    └── [Bottom Nav Tab 3] Profile    (reuse minggu 3 & 4)
             │
             └── navigate("edit_profile") ──► EditProfileScreen
                                              [Save/Cancel] popBackStack()
@@ -135,51 +131,92 @@ Tab switching: popUpTo(startDestination) + launchSingleTop + restoreState
 
 ---
 
-## 🧩 Komponen Navigation Utama
+## 🧩 Komponen Networking Utama
 
 | Komponen | File | Deskripsi |
 |---|---|---|
-| `sealed class Screen` | Screen.kt | Semua route definitions — best practice type-safe |
-| `AppNavigation()` | AppNavigation.kt | NavHost dengan semua composable destinations |
-| `GlassBottomNav()` | AppNavigation.kt | Bottom nav 3 tab dengan animasi spring + color |
-| `rememberNavController()` | AppNavigation.kt | NavController untuk mengatur perpindahan |
-| `navArgument("noteId")` | AppNavigation.kt | Required argument `IntType` untuk passing noteId |
-| `popBackStack()` | Semua detail screen | Back navigation yang proper |
-| `popUpTo + launchSingleTop` | GlassBottomNav | Tab switching tanpa duplicate back stack |
+| `NewsRepository` | NewsRepository.kt | Ktor HTTP client, base URL, & endpoint NewsAPI |
+| `NewsViewModel` | NewsViewModel.kt | StateFlow `NewsUiState` — Loading / Success / Error |
+| `Article` | Article.kt | Data class artikel hasil deserialisasi JSON |
+| `NewsApiResponse` | NewsApiResponse.kt | Wrapper response JSON dari NewsAPI |
+| `NewsListScreen` | NewsListScreen.kt | UI daftar berita + Pull-to-Refresh + state handling |
+| `NewsDetailScreen` | NewsDetailScreen.kt | UI detail artikel lengkap dengan gambar hero |
+| `GlassArticleCard` | NewsComponents.kt | Kartu artikel dengan efek glassmorphism + Coil image |
+| `ErrorView` | NewsComponents.kt | Tampilan error + tombol retry |
 
 ---
 
-## 🔄 Passing Arguments
+## 🔄 Alur Data — REST API
 
-### Required Argument — noteId
+### Setup Ktor Client
 ```kotlin
-// Route definition
-object NoteDetail : Screen("note_detail/{noteId}") {
-    fun createRoute(noteId: Int) = "note_detail/$noteId"
+// NewsRepository.kt
+private val client = HttpClient {
+    install(ContentNegotiation) {
+        json(Json { ignoreUnknownKeys = true })
+    }
 }
 
-// Navigate dengan argument
-navController.navigate(Screen.NoteDetail.createRoute(noteId = 3))
+private val baseUrl = "https://newsapi.org/v2"
+private val apiKey  = "MASUKKAN_API_KEY_ANDA_DI_SINI"
 
-// Ambil argument di destination
-composable(
-    route = Screen.NoteDetail.route,
-    arguments = listOf(navArgument("noteId") { type = NavType.IntType })
-) { backStackEntry ->
-    val noteId = backStackEntry.arguments?.getInt("noteId") ?: 0
-    NoteDetailScreen(note = noteViewModel.getNoteById(noteId))
+suspend fun getTopHeadlines(country: String = "us"): List<Article> {
+    val response: NewsApiResponse = client.get("$baseUrl/top-headlines") {
+        parameter("country", country)
+        parameter("apiKey", apiKey)
+    }.body()
+    return response.articles
 }
+```
+
+### State Management dengan StateFlow
+```kotlin
+// NewsViewModel.kt
+sealed class NewsUiState {
+    object Loading : NewsUiState()
+    data class Success(val articles: List<Article>) : NewsUiState()
+    data class Error(val message: String) : NewsUiState()
+}
+
+class NewsViewModel : ViewModel() {
+    private val repository = NewsRepository()
+    private val _uiState = MutableStateFlow<NewsUiState>(NewsUiState.Loading)
+    val uiState: StateFlow<NewsUiState> = _uiState.asStateFlow()
+
+    init { fetchNews() }
+
+    fun fetchNews() {
+        viewModelScope.launch {
+            _uiState.value = NewsUiState.Loading
+            try {
+                val articles = repository.getTopHeadlines()
+                _uiState.value = NewsUiState.Success(articles)
+            } catch (e: Exception) {
+                _uiState.value = NewsUiState.Error(e.message ?: "Terjadi kesalahan")
+            }
+        }
+    }
+}
+```
+
+### Asynchronous Image Loading dengan Coil 3
+```kotlin
+// GlassArticleCard — NewsComponents.kt
+AsyncImage(
+    model = article.urlToImage,
+    contentDescription = article.title,
+    contentScale = ContentScale.Crop,
+    error = painterResource(Res.drawable.placeholder),
+    placeholder = painterResource(Res.drawable.placeholder),
+    modifier = Modifier.fillMaxWidth().height(180.dp)
+)
 ```
 
 ---
 
 ## 🎨 Design System — Aurora Glass
 
-Particle network animasi di background hero profile tab, dengan:
-- 14 partikel bergerak sinusoidal secara independen
-- Garis koneksi antar partikel yang berdekatan (jarak < 30% lebar layar)
-- Grid dots tekstur tipis sebagai latar
-- Warna aksen: Violet, Lavender, Pink, Teal, Sky, Gold
+Efek glassmorphism kustom dengan latar particle network animasi, diterapkan konsisten di seluruh app:
 
 | Token | Dark Mode | Light Mode |
 |---|---|---|
@@ -187,6 +224,8 @@ Particle network animasi di background hero profile tab, dengan:
 | Glass Surface | `rgba(255,255,255, 7%)` | `rgba(0,0,0, 9%)` |
 | Text Primary | `rgba(255,255,255, 92%)` | `#1A1040` |
 | Accent Violet | `#7C6EFA` | sama |
+| Accent Teal | `#2DD4BF` | sama |
+| Accent Pink | `#F472B6` | sama |
 
 ---
 
@@ -196,15 +235,27 @@ Particle network animasi di background hero profile tab, dengan:
 ```bash
 git clone https://github.com/USERNAME/NAMA_REPO.git
 cd NAMA_REPO
-git checkout week-5
+git checkout week-6
 ```
+
+### Konfigurasi API Key
+
+Buka file berikut:
+```
+composeApp/src/commonMain/kotlin/org/garis/pam/data/NewsRepository.kt
+```
+Ganti nilai `apiKey` dengan kunci rahasia Anda:
+```kotlin
+private val apiKey = "MASUKKAN_API_KEY_ANDA_DI_SINI"
+```
+> Dapatkan API Key gratis di [newsapi.org](https://newsapi.org/)
 
 ### Android
 Buka di Android Studio → jalankan emulator → klik **▶ Run**
 
 ### Desktop
 ```bash
-./gradlew desktopRun
+./gradlew :composeApp:run
 ```
 
 ---
@@ -219,8 +270,25 @@ commonMain.dependencies {
     implementation(compose.ui)
     implementation(compose.animation)
     implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")
-    // ★ BARU MINGGU 5
     implementation("org.jetbrains.androidx.navigation:navigation-compose:2.7.0-alpha07")
+
+    // ★ BARU MINGGU 6
+    implementation("io.ktor:ktor-client-core:2.3.12")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.12")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.12")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
+    implementation("io.coil-kt.coil3:coil-compose:3.0.0-rc01")
+    implementation("io.coil-kt.coil3:coil-network-ktor3:3.0.0-rc01")
+}
+
+androidMain.dependencies {
+    // ★ BARU MINGGU 6
+    implementation("io.ktor:ktor-client-okhttp:2.3.12")
+}
+
+desktopMain.dependencies {
+    // ★ BARU MINGGU 6
+    implementation("io.ktor:ktor-client-okhttp:2.3.12")
 }
 ```
 
@@ -228,30 +296,26 @@ commonMain.dependencies {
 
 ## 📸 Screenshot
 
+| News List | News Detail | 
+|---|---|
+| <img width="1440" height="3120" alt="Screenshot_20260419_211020" src="https://github.com/user-attachments/assets/ce590788-09b9-4c3b-a9f4-7c3e533dc7e9" /> | <img width="1440" height="3120" alt="Screenshot_20260419_211055" src="https://github.com/user-attachments/assets/e847beb7-8a89-48f2-9030-6ae8794da167" /> | 
 
-| Notes Tab | Note Detail | Add Note |
-|---|---|---|
-| <img width="1440" height="3120" alt="Screenshot_20260406_135031" src="https://github.com/user-attachments/assets/975be527-a5c9-4404-9fce-ef420e788f31" /> | <img width="1440" height="3120" alt="Screenshot_20260406_135058" src="https://github.com/user-attachments/assets/d46c4830-0f2b-4ff8-a225-dca95af98b37" /> | <img width="1440" height="3120" alt="Screenshot_20260407_201511" src="https://github.com/user-attachments/assets/f656e660-5358-48fb-981d-dca984b89ea3" />
- |
 
-| Favorites Tab | Profile Tab | Edit Profile |
-|---|---|---|
-| <img width="1440" height="3120" alt="Screenshot_20260406_135045" src="https://github.com/user-attachments/assets/ba6aa040-3057-4060-9978-9e9294e0aab3" /> | <img width="1440" height="3120" alt="Screenshot_20260407_200857" src="https://github.com/user-attachments/assets/89dfb315-fd03-42a4-923e-7bb98e28d50d" /> | <img width="1440" height="3120" alt="Screenshot_20260407_201145" src="https://github.com/user-attachments/assets/8ef89fd2-8b55-4064-ab02-d1af5926ae85" /> |
 
 ---
 
-## 📚 Konsep yang Diterapkan Minggu 5
+## 📚 Konsep yang Diterapkan Minggu 6
 
-- ✅ **NavHost & NavController** — container dan pengatur navigasi
-- ✅ **Sealed class Routes** — type-safe route definitions
-- ✅ **Required Arguments** — `noteId: Int` passing antar screen
-- ✅ **navigate()** — forward navigation ke destination baru
-- ✅ **popBackStack()** — back navigation yang proper
-- ✅ **popUpTo + launchSingleTop** — tab switching tanpa duplicate stack
-- ✅ **Bottom Navigation** — 3 tabs dengan `NavigationBar` pattern
-- ✅ **Scaffold + bottomBar** — integrasi bottom nav dengan konten
-- ✅ **Conditional bottomBar** — hide bottom nav di detail screens
-- ✅ **Multi-ViewModel** — `ProfileViewModel` + `NoteViewModel` di satu app
+- ✅ **Ktor HTTP Client** — networking multiplatform untuk Android & Desktop
+- ✅ **REST API Integration** — konsumsi endpoint NewsAPI dengan parameter
+- ✅ **Kotlinx Serialization** — deserialisasi JSON ke data class Kotlin
+- ✅ **Repository Pattern** — abstraksi sumber data dari ViewModel
+- ✅ **StateFlow + Sealed Class** — reactive UI state (Loading / Success / Error)
+- ✅ **Coroutines + viewModelScope** — async network call yang aman
+- ✅ **Coil 3 Multiplatform** — asynchronous image loading lintas platform
+- ✅ **Pull-to-Refresh** — `PullRefreshIndicator` dari Material 3
+- ✅ **Error Handling & Retry** — penanganan exception + UI pemulihan
+- ✅ **Conditional UI** — tampilan berbeda setiap state antarmuka
 
 ---
 
@@ -261,10 +325,14 @@ Aplikasi ini dikembangkan secara bertahap:
 - **Minggu 3** — Profile App dasar, Compose layouts, custom composables
 - **Minggu 4** — MVVM, ViewModel, StateFlow, dark/light mode
 - **Minggu 5** — Navigation Component, multi-screen, Bottom Navigation
+- **Minggu 6** — Networking, REST API, Ktor Client, Coil image loading
 
 ---
 
 <div align="center">
+
+Link Vidio Demo :
+https://youtube.com/shorts/J37R0dRmwLQ 
 
 Dibuat dengan ❤️ menggunakan Kotlin & Compose Multiplatform
 IF25-22017 · ITERA · 2025/2026
