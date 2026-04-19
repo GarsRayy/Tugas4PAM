@@ -22,8 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.kamel.image.KamelImage
-import io.kamel.image.asyncPainterResource
+import coil3.compose.AsyncImage
 import org.garis.pam.data.Article
 import org.garis.pam.viewmodel.NewsUiState
 import org.garis.pam.viewmodel.NewsViewModel
@@ -129,44 +128,16 @@ fun NewsItemGlassCard(article: Article, onClick: () -> Unit) {
                 .padding(16.dp)
         ) {
             Column {
-                // ✅ PERBAIKAN: Hapus Box placeholder yang menutupi KamelImage
                 val imageUrl = article.urlToImage
                 if (imageUrl != null) {
-                    KamelImage(
-                        resource = asyncPainterResource(data = imageUrl),
+                    AsyncImage(
+                        model = imageUrl,
                         contentDescription = "Gambar Artikel",
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(180.dp)
                             .clip(RoundedCornerShape(12.dp)),
-                        contentScale = ContentScale.Crop,
-                        onLoading = {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(180.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(Color.White.copy(alpha = 0.1f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator(color = Color(0xFF38BDF8))
-                            }
-                        },
-                        onFailure = {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(180.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(Color.White.copy(alpha = 0.1f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    "Gagal memuat gambar",
-                                    color = Color.White.copy(alpha = 0.5f)
-                                )
-                            }
-                        }
+                        contentScale = ContentScale.Crop
                     )
                 } else {
                     // Placeholder jika API tidak mengembalikan URL gambar

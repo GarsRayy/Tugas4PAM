@@ -18,8 +18,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.kamel.image.KamelImage
-import io.kamel.image.asyncPainterResource
+import coil3.compose.AsyncImage
 import org.garis.pam.data.Article
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,8 +57,8 @@ fun NewsDetailScreen(
                 // Gambar Artikel
                 val imageUrl = article.urlToImage
                 if (imageUrl != null) {
-                    KamelImage(
-                        resource = asyncPainterResource(data = imageUrl),
+                    AsyncImage(
+                        model = imageUrl,
                         contentDescription = "Gambar Berita",
                         modifier = Modifier
                             .fillMaxWidth()

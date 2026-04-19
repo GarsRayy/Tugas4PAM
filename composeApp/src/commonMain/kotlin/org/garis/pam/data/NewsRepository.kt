@@ -17,6 +17,8 @@ class NewsRepository(private val client: HttpClient) {
                     parameters.append("country", "us")
                     parameters.append("category", "general")
                     parameters.append("apiKey", apiKey)
+                    // Menambahkan timestamp untuk menghindari caching agar berita selalu fresh
+                    parameters.append("t", kotlinx.datetime.Clock.System.now().toEpochMilliseconds().toString())
                 }
             }.body()
             Result.success(response.articles)
