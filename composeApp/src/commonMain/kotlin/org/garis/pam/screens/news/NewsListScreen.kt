@@ -1,11 +1,10 @@
 package org.garis.pam.screens.news
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -15,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -46,16 +46,12 @@ fun NewsListScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        GlassTheme.colors.BgPage,
-                        GlassTheme.colors.BgPhone
-                    )
-                )
-            )
+            .background(GlassTheme.colors.BgPage)
             .pullRefresh(pullRefreshState)
     ) {
+        // --- Efek Aurora Background ---
+        AuroraBackground()
+
         when (val state = uiState) {
             is NewsUiState.Loading -> {
                 CircularProgressIndicator(
@@ -66,34 +62,37 @@ fun NewsListScreen(
             is NewsUiState.Success -> {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    contentPadding = PaddingValues(bottom = 80.dp)
                 ) {
-                    items(state.articles) { article ->
-                        NewsItemGlassCard(
-                            article = article,
-                            onClick = { onNavigateToDetail(article) }
+                    item {
+                        Text(
+                            "Berita Utama",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = GlassTheme.colors.TextPrimary,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(16.dp)
                         )
+                    }
+
+                    itemsIndexed(state.articles) { index, article ->
+                        if (index == 0) {
+                            // Berita Utama (Featured)
+                            FeaturedNewsCard(
+                                article = article,
+                                onClick = { onNavigateToDetail(article) }
+                            )
+                        } else {
+                            // Berita Reguler
+                            NewsItemGlassCard(
+                                article = article,
+                                onClick = { onNavigateToDetail(article) }
+                            )
+                        }
                     }
                 }
             }
             is NewsUiState.Error -> {
-                Column(
-                    modifier = Modifier.align(Alignment.Center),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Error: ${state.message}",
-                        color = Color(0xFFF87171),
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-                    Button(
-                        onClick = { viewModel.loadNews() },
-                        colors = ButtonDefaults.buttonColors(containerColor = GlassTheme.colors.Violet)
-                    ) {
-                        Text("Coba Lagi", color = Color.White)
-                    }
-                }
+                ErrorView(message = state.message, onRetry = { viewModel.loadNews() })
             }
         }
 
@@ -108,74 +107,146 @@ fun NewsListScreen(
 }
 
 @Composable
-fun NewsItemGlassCard(article: Article, onClick: () -> Unit) {
+fun AuroraBackground() {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .size(300.dp)
+                .offset(x = (-100).dp, y = (-50).dp)
+                .blur(100.dp)
+                .clip(CircleShape)
+                .background(GlassTheme.colors.Violet.copy(alpha = 0.2f))
+        )
+        Box(
+            modifier = Modifier
+                .size(250.dp)
+                .align(Alignment.BottomEnd)
+                .offset(x = 50.dp, y = 50.dp)
+                .blur(80.dp)
+                .clip(CircleShape)
+                .background(GlassTheme.colors.Sky.copy(alpha = 0.15f))
+        )
+    }
+}
+
+@Composable
+fun FeaturedNewsCard(article: Article, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .height(380.dp)
+            .padding(16.dp)
             .clickable { onClick() }
-            .clip(RoundedCornerShape(20.dp)),
-        colors = CardDefaults.cardColors(
-            containerColor = GlassTheme.colors.GlassBg
-        ),
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            .border(
+                1.dp,
+                Brush.linearGradient(
+                    listOf(GlassTheme.colors.Violet.copy(0.5f), Color.Transparent)
+                ),
+                RoundedCornerShape(24.dp)
+            ),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .border(
-                    1.dp,
-                    GlassTheme.colors.GlassBorder2,
-                    RoundedCornerShape(20.dp)
-                )
-                .padding(16.dp)
-        ) {
-            Column {
-                val imageUrl = article.urlToImage
-                if (imageUrl != null) {
-                    AsyncImage(
-                        model = imageUrl,
-                        contentDescription = "Gambar Artikel",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(180.dp)
-                            .clip(RoundedCornerShape(12.dp)),
-                        contentScale = ContentScale.Crop
+        Box(modifier = Modifier.fillMaxSize()) {
+            AsyncImage(
+                model = article.urlToImage,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+            // Overlay Gradien
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f)),
+                            startY = 400f
+                        )
                     )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(180.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(GlassTheme.colors.GlassBorder2),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("Tidak ada gambar", color = GlassTheme.colors.TextMuted)
-                    }
+            )
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(20.dp)
+            ) {
+                Surface(
+                    color = GlassTheme.colors.Violet.copy(alpha = 0.8f),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        "TERBARU",
+                        color = Color.White,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
                 }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
+                Spacer(Modifier.height(8.dp))
                 Text(
                     text = article.title,
-                    color = GlassTheme.colors.TextPrimary,
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                Text(
-                    text = article.description ?: "Tidak ada deskripsi.",
-                    color = GlassTheme.colors.TextSecond,
-                    fontSize = 14.sp,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
+                    maxLines = 3
                 )
             }
         }
+    }
+}
+
+@Composable
+fun NewsItemGlassCard(article: Article, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(GlassTheme.colors.GlassBg)
+            .border(0.5.dp, GlassTheme.colors.GlassBorder2, RoundedCornerShape(20.dp))
+            .clickable { onClick() }
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(
+                model = article.urlToImage,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = article.title,
+                    color = GlassTheme.colors.TextPrimary,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = article.publishedAt.take(10),
+                    color = GlassTheme.colors.TextMuted,
+                    fontSize = 12.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ErrorView(message: String, onRetry: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(message, color = Color.Red.copy(0.7f))
+        Button(onClick = onRetry) { Text("Coba Lagi") }
     }
 }
