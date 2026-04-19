@@ -18,8 +18,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.kamel.image.KamelImage
-import io.kamel.image.asyncPainterResource
+import coil3.compose.AsyncImage
+import org.garis.pam.GlassTheme
 import org.garis.pam.data.Article
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,14 +31,18 @@ fun NewsDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Detail Berita", color = Color.White) },
+                title = { Text("Detail Berita", color = GlassTheme.colors.TextPrimary) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            tint = GlassTheme.colors.TextPrimary
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF0F172A)
+                    containerColor = GlassTheme.colors.BgPage
                 )
             )
         }
@@ -46,7 +50,14 @@ fun NewsDetailScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Brush.verticalGradient(listOf(Color(0xFF0F172A), Color(0xFF1E293B))))
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            GlassTheme.colors.BgPage,
+                            GlassTheme.colors.BgPhone
+                        )
+                    )
+                )
                 .padding(paddingValues)
         ) {
             Column(
@@ -58,8 +69,8 @@ fun NewsDetailScreen(
                 // Gambar Artikel
                 val imageUrl = article.urlToImage
                 if (imageUrl != null) {
-                    KamelImage(
-                        resource = asyncPainterResource(data = imageUrl),
+                    AsyncImage(
+                        model = imageUrl,
                         contentDescription = "Gambar Berita",
                         modifier = Modifier
                             .fillMaxWidth()
@@ -74,7 +85,7 @@ fun NewsDetailScreen(
                 // Tanggal
                 Text(
                     text = article.publishedAt.take(10), // Mengambil format YYYY-MM-DD
-                    color = Color(0xFF38BDF8),
+                    color = GlassTheme.colors.Sky,
                     fontSize = 14.sp
                 )
 
@@ -83,7 +94,7 @@ fun NewsDetailScreen(
                 // Judul
                 Text(
                     text = article.title,
-                    color = Color.White,
+                    color = GlassTheme.colors.TextPrimary,
                     fontWeight = FontWeight.Bold,
                     fontSize = 22.sp
                 )
@@ -93,7 +104,7 @@ fun NewsDetailScreen(
                 // Konten / Deskripsi
                 Text(
                     text = article.description ?: "Tidak ada detail konten untuk berita ini.",
-                    color = Color.White.copy(alpha = 0.8f),
+                    color = GlassTheme.colors.TextSecond,
                     fontSize = 16.sp,
                     lineHeight = 24.sp
                 )
