@@ -1,0 +1,55 @@
+-- composeApp/src/commonMain/sqldelight/org/garis/pam/db/Note.sq
+
+CREATE TABLE NoteEntity (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    is_favorite INTEGER NOT NULL DEFAULT 0,
+    color_name TEXT NOT NULL DEFAULT 'VIOLET',
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+);
+
+-- Mengambil semua catatan, diurutkan dari yang terbaru
+selectAll:
+SELECT * FROM NoteEntity ORDER BY updated_at DESC;
+
+-- Mengambil semua catatan, diurutkan dari yang terlama
+selectAllOldest:
+SELECT * FROM NoteEntity ORDER BY updated_at ASC;
+
+-- Mengambil catatan favorit
+selectFavorites:
+SELECT * FROM NoteEntity WHERE is_favorite = 1 ORDER BY updated_at DESC;
+
+-- Mengambil 1 catatan berdasarkan ID
+selectById:
+SELECT * FROM NoteEntity WHERE id = ?;
+
+-- Menambahkan catatan baru
+insert:
+INSERT INTO NoteEntity(title, content, is_favorite, color_name, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?);
+
+-- Memperbarui catatan
+update:
+UPDATE NoteEntity SET title = ?, content = ?, color_name = ?, updated_at = ? WHERE id = ?;
+
+-- Toggle Favorite
+toggleFavorite:
+UPDATE NoteEntity SET is_favorite = CASE WHEN is_favorite = 1 THEN 0 ELSE 1 END WHERE id = ?;
+
+-- Menghapus catatan
+delete:
+DELETE FROM NoteEntity WHERE id = ?;
+
+-- Fitur pencarian
+search:
+SELECT * FROM NoteEntity
+WHERE (title LIKE ('%' || :query || '%') OR content LIKE ('%' || :query || '%'))
+ORDER BY updated_at DESC;
+
+searchOldest:
+SELECT * FROM NoteEntity
+WHERE (title LIKE ('%' || :query || '%') OR content LIKE ('%' || :query || '%'))
+ORDER BY updated_at ASC;

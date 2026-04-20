@@ -319,10 +319,11 @@ fun HeroSection(
 fun StatsAndActions(
     subtitle: String,
     isDarkMode: Boolean,
-    onToggleDark: () -> Unit,
-    onEditClick: () -> Unit,         // ← tombol edit FAB diganti ke sini
+    onSettingsClick: () -> Unit,
+    onEditClick: () -> Unit,         
 ) {
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+        // ... (Stats row code)
 
         // Stats row — sama seperti sebelumnya
         Row(
@@ -376,9 +377,9 @@ fun StatsAndActions(
                 }
             }
 
-            // Tombol Dark Mode Toggle (BONUS)
+            // Tombol Pengaturan (Ganti dari Toggle Dark Mode)
             OutlinedButton(
-                onClick = onToggleDark,
+                onClick = onSettingsClick,
                 modifier = Modifier.weight(1f).height(44.dp),
                 shape = RoundedCornerShape(14.dp),
                 border = BorderStroke(1.dp, GlassTheme.colors.GlassBorder),
@@ -387,7 +388,7 @@ fun StatsAndActions(
                 )
             ) {
                 Text(
-                    if (isDarkMode) "☀ Light Mode" else "🌙 Dark Mode",
+                    "⚙️ Pengaturan",
                     fontSize = 13.sp, color = GlassTheme.colors.TextPrimary
                 )
             }

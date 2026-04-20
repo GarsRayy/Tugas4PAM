@@ -11,14 +11,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import org.garis.pam.GlassTheme
-import org.garis.pam.data.Note
+import org.garis.pam.db.NoteEntity
 import org.garis.pam.screens.notes.NoteCard
 
 @Composable
 fun FavoritesScreen(
-    favorites: List<Note>,
-    onNoteClick: (Int) -> Unit,
-    onToggleFavorite: (Int) -> Unit
+    favorites: List<NoteEntity>,
+    onNoteClick: (Long) -> Unit,
+    onToggleFavorite: (Long) -> Unit
 ) {
     Column(
         modifier = Modifier

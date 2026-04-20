@@ -3,21 +3,29 @@ package org.garis.pam.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import org.garis.pam.GlassTheme
 import org.garis.pam.data.UserProfile
+import org.garis.pam.viewmodel.SettingsViewModel
+import org.garis.pam.screens.SettingsScreen
 
 @Composable
 fun ProfileScreen(
     profile: UserProfile,
     isDarkMode: Boolean,
-    onEditClick: () -> Unit,       // callback ke ViewModel.startEditing()
-    onToggleDark: () -> Unit       // callback ke ViewModel.toggleDarkMode()
+    onEditClick: () -> Unit,       
+    settingsViewModel: SettingsViewModel
 ) {
+    var showSettings by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -41,10 +49,25 @@ fun ProfileScreen(
                     name  = profile.name,
                     badge = profile.badge
                 )
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = onEditClick,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = GlassTheme.colors.Violet)
+                    ) {
+                        Text("Edit Profil", color = androidx.compose.ui.graphics.Color.White)
+                    }
+                }
+
                 StatsAndActions(
                     subtitle     = profile.subtitle,
                     isDarkMode   = isDarkMode,
-                    onToggleDark = onToggleDark,
+                    onSettingsClick = { showSettings = true },
                     onEditClick  = onEditClick
                 )
                 Spacer(Modifier.height(4.dp))
@@ -59,6 +82,25 @@ fun ProfileScreen(
                 SkillsGrid()
                 Spacer(Modifier.height(20.dp))
             }
+        }
+
+        if (showSettings) {
+            AlertDialog(
+                onDismissRequest = { showSettings = false },
+                confirmButton = {
+                    TextButton(onClick = { showSettings = false }) {
+                        Text("Tutup", color = GlassTheme.colors.Violet)
+                    }
+                },
+                title = { Text("Pengaturan", color = GlassTheme.colors.TextPrimary) },
+                text = {
+                    Box(modifier = Modifier.height(400.dp)) {
+                        SettingsScreen(viewModel = settingsViewModel)
+                    }
+                },
+                containerColor = GlassTheme.colors.BgPhone,
+                shape = RoundedCornerShape(24.dp)
+            )
         }
     }
 }

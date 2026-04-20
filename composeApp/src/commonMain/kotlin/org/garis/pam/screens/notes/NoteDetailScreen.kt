@@ -12,25 +12,18 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import org.garis.pam.GlassTheme
-import org.garis.pam.data.Note
-import org.garis.pam.data.NoteColor
+import org.garis.pam.db.NoteEntity
 import androidx.compose.ui.draw.clip
 
 @Composable
 fun NoteDetailScreen(
-    note: Note,
+    note: NoteEntity,
     onBack: () -> Unit,                // popBackStack()
-    onEditClick: (Int) -> Unit,        // navigate ke EditNote dengan noteId
-    onToggleFavorite: (Int) -> Unit,
-    onDelete: (Int) -> Unit
+    onEditClick: (Long) -> Unit,        // navigate ke EditNote dengan noteId
+    onToggleFavorite: (Long) -> Unit,
+    onDelete: (Long) -> Unit
 ) {
-    val accentColor = when (note.color) {
-        NoteColor.VIOLET -> GlassTheme.colors.Violet
-        NoteColor.TEAL   -> GlassTheme.colors.Teal
-        NoteColor.PINK   -> GlassTheme.colors.Pink
-        NoteColor.GOLD   -> GlassTheme.colors.Gold
-        NoteColor.SKY    -> GlassTheme.colors.Sky
-    }
+    val accentColor = GlassTheme.colors.Violet
 
     Column(
         modifier = Modifier
@@ -74,7 +67,7 @@ fun NoteDetailScreen(
                         .clickable { onToggleFavorite(note.id) },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(if (note.isFavorite) "❤" else "🤍", fontSize = 16.sp)
+                    Text("🤍", fontSize = 16.sp)
                 }
                 // Edit
                 Box(
@@ -120,7 +113,7 @@ fun NoteDetailScreen(
 
             Spacer(Modifier.height(8.dp))
             Text(
-                note.createdAt,
+                note.created_at.toString(),
                 fontSize = 12.sp,
                 color = GlassTheme.colors.TextMuted
             )

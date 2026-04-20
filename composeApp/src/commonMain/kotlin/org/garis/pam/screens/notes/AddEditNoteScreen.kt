@@ -16,16 +16,21 @@ import org.garis.pam.data.NoteColor
 import org.garis.pam.ui.GlassTextField  // reuse dari minggu lalu
 import androidx.compose.ui.draw.clip
 
+import org.garis.pam.viewmodel.NoteViewModel
+
 @Composable
 fun AddEditNoteScreen(
-    title: String,
-    content: String,
-    isEditMode: Boolean = false,       // true = edit, false = add baru
-    onTitleChange: (String) -> Unit,
-    onContentChange: (String) -> Unit,
-    onSave: () -> Unit,
+    viewModel: NoteViewModel,
     onBack: () -> Unit
 ) {
+    val selectedNote by viewModel.selectedNote.collectAsState()
+    
+    var titleState by remember(selectedNote) { mutableStateOf(selectedNote?.title ?: "") }
+    var contentState by remember(selectedNote) { mutableStateOf(selectedNote?.content ?: "") }
+    var colorNameState by remember(selectedNote) { mutableStateOf(selectedNote?.color_name ?: "VIOLET") }
+    
+    val colors = listOf("VIOLET", "TEAL", "PINK", "GOLD", "SKY")
+    
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -59,7 +64,7 @@ fun AddEditNoteScreen(
             }
 
             Text(
-                if (isEditMode) "✏ Edit Catatan" else "📝 Catatan Baru",
+                if (selectedNote != null) "✏ Edit Catatan" else "📝 Catatan Baru",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = GlassTheme.colors.TextPrimary
@@ -70,26 +75,63 @@ fun AddEditNoteScreen(
 
         Spacer(Modifier.height(8.dp))
 
-        // TextField Judul — stateless (state hoisting ke ViewModel)
+        // TextField Judul
         GlassTextField(
             label = "Judul",
-            value = title,
-            onValueChange = onTitleChange
+            value = titleState,
+            onValueChange = { titleState = it }
         )
 
-        // TextField Isi — multi-line
+        // TextField Isi
         GlassTextField(
             label = "Isi catatan...",
-            value = content,
-            onValueChange = onContentChange,
+            value = contentState,
+            onValueChange = { contentState = it },
             maxLines = 12
         )
+
+        Spacer(Modifier.height(8.dp))
+        
+        // Color Picker
+        Text("Pilih Warna", color = GlassTheme.colors.TextPrimary, fontWeight = FontWeight.SemiBold)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            colors.forEach { colorName ->
+                val color = when(colorName) {
+                    "VIOLET" -> GlassTheme.colors.Violet
+                    "TEAL" -> GlassTheme.colors.Teal
+                    "PINK" -> GlassTheme.colors.Pink
+                    "GOLD" -> GlassTheme.colors.Gold
+                    "SKY" -> GlassTheme.colors.Sky
+                    else -> Color.Gray
+                }
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(color)
+                        .border(
+                            if (colorNameState == colorName) 3.dp else 0.dp,
+                            Color.White,
+                            CircleShape
+                        )
+                        .clickable { colorNameState = colorName }
+                )
+            }
+        }
 
         Spacer(Modifier.height(8.dp))
 
         // Tombol Simpan
         Button(
-            onClick = onSave,
+            onClick = { 
+                if (titleState.isNotBlank()) {
+                    viewModel.saveNote(titleState, contentState, colorNameState)
+                    onBack() 
+                }
+            },
             modifier = Modifier.fillMaxWidth().height(50.dp),
             shape = RoundedCornerShape(14.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),

@@ -65,8 +65,21 @@ val LightGlassColors = GlassColors(
     TextMuted    = Color(0xFF8878BB),   // ungu muda
 )
 
+// ── Aurora Glass colors (Premium Look) ──
+val AuroraGlassColors = GlassColors(
+    BgPage       = Color(0xFF0F172A),
+    BgPhone      = Color(0xFF1E293B),
+    BgHeroTop    = Color(0xFF334155),
+    GlassBg      = Color(0x2038BDF8),
+    GlassBorder  = Color(0x4038BDF8),
+    GlassBorder2 = Color(0x2038BDF8),
+    TextPrimary  = Color(0xFFF8FAFC),
+    TextSecond   = Color(0xFF38BDF8),
+    TextMuted    = Color(0xFF94A3B8),
+)
+
 // ── CompositionLocal supaya GlassTheme bisa diakses dari mana saja ──
-val LocalGlassColors = compositionLocalOf { DarkGlassColors }
+val LocalGlassColors = compositionLocalOf { AuroraGlassColors }
 
 // ── Shortcut akses: GlassTheme.colors.Violet dll ──
 object GlassTheme {
