@@ -18,7 +18,8 @@ import org.garis.pam.screens.notes.NoteCard
 fun FavoritesScreen(
     favorites: List<NoteEntity>,
     onNoteClick: (Long) -> Unit,
-    onToggleFavorite: (Long) -> Unit
+    onToggleFavorite: (Long) -> Unit,
+    onTogglePin: (Long) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -83,7 +84,8 @@ fun FavoritesScreen(
                     NoteCard(
                         note = note,
                         onClick = { onNoteClick(note.id) },
-                        onToggleFavorite = { onToggleFavorite(note.id) }
+                        onToggleFavorite = { onToggleFavorite(note.id) },
+                        onTogglePin = { onTogglePin(note.id) }
                     )
                 }
             }

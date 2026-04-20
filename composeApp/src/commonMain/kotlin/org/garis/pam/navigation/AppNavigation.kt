@@ -30,6 +30,8 @@ import org.garis.pam.data.HttpClientFactory
 import org.garis.pam.viewmodel.NewsViewModel
 import org.garis.pam.screens.news.NewsListScreen
 import org.garis.pam.screens.news.NewsDetailScreen
+import org.garis.pam.db.NoteEntity
+import org.garis.pam.data.Article
 
 import org.garis.pam.db.NotesDatabase
 import org.garis.pam.data.NoteRepository
@@ -92,7 +94,7 @@ fun AppNavigation(
                 NoteListScreen(
                     viewModel        = noteViewModel,
                     settingsViewModel = settingsViewModel,
-                    onNoteClick      = { noteId ->
+                    onNoteClick      = { noteId: Long ->
                         noteViewModel.selectNote(noteId)
                         navController.navigate(Screen.NoteDetail.createRoute(noteId))
                     },
@@ -100,8 +102,11 @@ fun AppNavigation(
                         noteViewModel.clearSelectedNote()
                         navController.navigate(Screen.AddNote.route) 
                     },
-                    onToggleFavorite = { noteId ->
+                    onToggleFavorite = { noteId: Long ->
                         noteViewModel.toggleFavorite(noteId)
+                    },
+                    onTogglePin = { noteId: Long ->
+                        noteViewModel.togglePin(noteId)
                     }
                 )
             }
@@ -110,12 +115,15 @@ fun AppNavigation(
             composable(Screen.Favorites.route) {
                 FavoritesScreen(
                     favorites        = favoriteNotes,
-                    onNoteClick      = { noteId ->
+                    onNoteClick      = { noteId: Long ->
                         noteViewModel.selectNote(noteId)
                         navController.navigate(Screen.NoteDetail.createRoute(noteId))
                     },
-                    onToggleFavorite = { noteId ->
+                    onToggleFavorite = { noteId: Long ->
                         noteViewModel.toggleFavorite(noteId)
+                    },
+                    onTogglePin = { noteId: Long ->
+                        noteViewModel.togglePin(noteId)
                     }
                 )
             }
@@ -124,7 +132,7 @@ fun AppNavigation(
             composable(Screen.News.route) {
                 NewsListScreen(
                     viewModel = newsViewModel,
-                    onNavigateToDetail = { article ->
+                    onNavigateToDetail = { article: Article ->
                         newsViewModel.selectArticle(article)
                         navController.navigate(Screen.NewsDetail.route)
                     }

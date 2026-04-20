@@ -70,6 +70,12 @@ class NoteViewModel(private val repository: NoteRepository) : ViewModel() {
         }
     }
 
+    fun togglePin(id: Long) {
+        viewModelScope.launch {
+            repository.togglePin(id)
+        }
+    }
+
     fun deleteNote(id: Long) {
         viewModelScope.launch {
             repository.deleteNote(id)

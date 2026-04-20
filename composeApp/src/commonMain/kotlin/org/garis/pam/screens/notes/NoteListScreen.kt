@@ -34,7 +34,8 @@ fun NoteListScreen(
     settingsViewModel: SettingsViewModel,
     onNoteClick: (Long) -> Unit,       // navigate ke detail dengan noteId
     onAddClick: () -> Unit,           // navigate ke add note
-    onToggleFavorite: (Long) -> Unit
+    onToggleFavorite: (Long) -> Unit,
+    onTogglePin: (Long) -> Unit
 ) {
     val notes by viewModel.notes.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -115,7 +116,8 @@ fun NoteListScreen(
                     NoteCard(
                         note = note,
                         onClick = { onNoteClick(note.id) },
-                        onToggleFavorite = { onToggleFavorite(note.id) }
+                        onToggleFavorite = { onToggleFavorite(note.id) },
+                        onTogglePin = { onTogglePin(note.id) }
                     )
                 }
             }
@@ -140,7 +142,8 @@ fun NoteListScreen(
 fun NoteCard(
     note: NoteEntity,
     onClick: () -> Unit,
-    onToggleFavorite: () -> Unit
+    onToggleFavorite: () -> Unit,
+    onTogglePin: () -> Unit
 ) {
     val accentColor = when (note.color_name) {
         "VIOLET" -> GlassTheme.colors.Violet
@@ -155,8 +158,12 @@ fun NoteCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .border(1.dp, GlassTheme.colors.GlassBorder, RoundedCornerShape(16.dp))
-            .background(GlassTheme.colors.GlassBg)
+            .border(
+                1.dp, 
+                if (note.is_pinned == 1L) GlassTheme.colors.Violet else GlassTheme.colors.GlassBorder, 
+                RoundedCornerShape(16.dp)
+            )
+            .background(if (note.is_pinned == 1L) GlassTheme.colors.Violet.copy(alpha = 0.05f) else GlassTheme.colors.GlassBg)
             .clickable(onClick = onClick)
     ) {
         // Accent bar kiri
@@ -201,19 +208,39 @@ fun NoteCard(
                 )
             }
 
-            // Favorite button
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(GlassTheme.colors.GlassBg)
-                    .clickable(onClick = onToggleFavorite),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    if (note.is_favorite == 1L) "❤" else "🤍",
-                    fontSize = 16.sp
-                )
+            // Action Buttons (Pin & Favorite)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                // Pin button
+                Box(
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(if (note.is_pinned == 1L) GlassTheme.colors.Violet.copy(alpha = 0.2f) else GlassTheme.colors.GlassBg)
+                        .clickable(onClick = onTogglePin),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        if (note.is_pinned == 1L) "📌" else "📍",
+                        fontSize = 14.sp,
+                        modifier = Modifier.graphicsLayer { rotationZ = if (note.is_pinned == 1L) 0f else -45f }
+                    )
+                }
+
+                // Favorite button
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(GlassTheme.colors.GlassBg)
+                        .clickable(onClick = onToggleFavorite),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        if (note.is_favorite == 1L) "❤" else "🤍",
+                        fontSize = 16.sp
+                    )
+                }
             }
         }
     }

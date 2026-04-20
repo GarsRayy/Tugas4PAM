@@ -57,7 +57,7 @@ class NoteRepository(database: NotesDatabase) {
     suspend fun insertNote(title: String, content: String, colorName: String = "VIOLET") {
         val now = Clock.System.now().toEpochMilliseconds()
         withContext(Dispatchers.Default) {
-            queries.insert(title, content, 0, colorName, now, now)
+            queries.insert(title, content, 0L, 0L, colorName, now, now)
         }
     }
 
@@ -73,6 +73,13 @@ class NoteRepository(database: NotesDatabase) {
     suspend fun toggleFavorite(id: Long) {
         withContext(Dispatchers.Default) {
             queries.toggleFavorite(id)
+        }
+    }
+
+    // TOGGLE PIN
+    suspend fun togglePin(id: Long) {
+        withContext(Dispatchers.Default) {
+            queries.togglePinned(id)
         }
     }
 
