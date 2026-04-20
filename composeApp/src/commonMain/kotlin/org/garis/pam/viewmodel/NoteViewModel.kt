@@ -1,92 +1,88 @@
 package org.garis.pam.viewmodel
 
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import org.garis.pam.data.Note
-import org.garis.pam.data.NoteColor
-import org.garis.pam.data.sampleNotes
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import org.garis.pam.data.NoteRepository
+import org.garis.pam.db.NoteEntity
 
-data class NoteUiState(
-    val notes: List<Note> = sampleNotes,
-    val selectedNote: Note? = null,
-    val editTitle: String = "",
-    val editContent: String = ""
-)
+class NoteViewModel(private val repository: NoteRepository) : ViewModel() {
 
-class NoteViewModel : ViewModel() {
+    // Menyimpan state text pencarian dan urutan sortir
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    private val _uiState = MutableStateFlow(NoteUiState())
-    val uiState: StateFlow<NoteUiState> = _uiState.asStateFlow()
+    private val _sortOrder = MutableStateFlow("newest")
+    val sortOrder: StateFlow<String> = _sortOrder.asStateFlow()
 
-    // Ambil note berdasarkan id
-    fun getNoteById(id: Int): Note? =
-        _uiState.value.notes.find { it.id == id }
-
-    // Pilih note untuk dilihat detailnya
-    fun selectNote(note: Note) {
-        _uiState.update { it.copy(
-            selectedNote = note,
-            editTitle   = note.title,
-            editContent = note.content
-        )}
-    }
-
-    // Toggle favorite
-    fun toggleFavorite(noteId: Int) {
-        _uiState.update { state ->
-            state.copy(
-                notes = state.notes.map { note ->
-                    if (note.id == noteId) note.copy(isFavorite = !note.isFavorite)
-                    else note
-                }
-            )
+    // Menggabungkan aliran data database dengan input pencarian dan sortir
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    val notes: StateFlow<List<NoteEntity>> = combine(_searchQuery, _sortOrder) { query, order ->
+        query to order
+    }.flatMapLatest { (query, order) ->
+        if (query.isBlank()) {
+            repository.getAllNotes(order)
+        } else {
+            repository.searchNotes(query, order)
         }
     }
+    .stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
 
-    // Update field saat edit (state hoisting)
-    fun onTitleChange(title: String) {
-        _uiState.update { it.copy(editTitle = title) }
-    }
-    fun onContentChange(content: String) {
-        _uiState.update { it.copy(editContent = content) }
-    }
-
-    // Simpan perubahan note
-    fun saveNote(noteId: Int) {
-        _uiState.update { state ->
-            state.copy(
-                notes = state.notes.map { note ->
-                    if (note.id == noteId) note.copy(
-                        title   = state.editTitle.ifBlank { note.title },
-                        content = state.editContent.ifBlank { note.content }
-                    ) else note
-                }
-            )
-        }
-    }
-
-    // Tambah note baru
-    fun addNote(title: String, content: String, color: NoteColor = NoteColor.VIOLET) {
-        val newNote = Note(
-            id        = (_uiState.value.notes.maxOfOrNull { it.id } ?: 0) + 1,
-            title     = title,
-            content   = content,
-            color     = color,
-            createdAt = "Baru saja"
+    val favoriteNotes: StateFlow<List<NoteEntity>> = repository.getFavoriteNotes()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
         )
-        _uiState.update { it.copy(notes = it.notes + newNote) }
+
+    private val _selectedNote = MutableStateFlow<NoteEntity?>(null)
+    val selectedNote: StateFlow<NoteEntity?> = _selectedNote.asStateFlow()
+
+    fun updateSearchQuery(query: String) {
+        _searchQuery.value = query
     }
 
-    // Hapus note
-    fun deleteNote(noteId: Int) {
-        _uiState.update { state ->
-            state.copy(notes = state.notes.filter { it.id != noteId })
+    fun updateSortOrder(order: String) {
+        _sortOrder.value = order
+    }
+
+    fun saveNote(title: String, content: String, colorName: String = "VIOLET") {
+        viewModelScope.launch {
+            val currentNote = _selectedNote.value
+            if (currentNote == null) {
+                repository.insertNote(title, content, colorName)
+            } else {
+                repository.updateNote(currentNote.id, title, content, colorName)
+            }
+            // Kosongkan pilihan setelah disimpan
+            clearSelectedNote()
         }
     }
 
-    // Note yang difavoritkan
-    fun getFavoriteNotes() = _uiState.value.notes.filter { it.isFavorite }
+    fun toggleFavorite(id: Long) {
+        viewModelScope.launch {
+            repository.toggleFavorite(id)
+        }
+    }
+
+    fun deleteNote(id: Long) {
+        viewModelScope.launch {
+            repository.deleteNote(id)
+        }
+    }
+
+    fun selectNote(id: Long) {
+        viewModelScope.launch {
+            _selectedNote.value = repository.getNoteById(id)
+        }
+    }
+
+    fun clearSelectedNote() {
+        _selectedNote.value = null
+    }
 }

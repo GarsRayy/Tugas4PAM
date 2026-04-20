@@ -14,17 +14,37 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 import org.garis.pam.GlassTheme
-import org.garis.pam.data.Note
+import org.garis.pam.db.NoteEntity
 import org.garis.pam.data.NoteColor
 import androidx.compose.ui.draw.clip
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import org.garis.pam.viewmodel.NoteViewModel
+import org.garis.pam.viewmodel.SettingsViewModel
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.RectangleShape
+
 @Composable
 fun NoteListScreen(
-    notes: List<Note>,
-    onNoteClick: (Int) -> Unit,       // navigate ke detail dengan noteId
+    viewModel: NoteViewModel,
+    settingsViewModel: SettingsViewModel,
+    onNoteClick: (Long) -> Unit,       // navigate ke detail dengan noteId
     onAddClick: () -> Unit,           // navigate ke add note
-    onToggleFavorite: (Int) -> Unit
+    onToggleFavorite: (Long) -> Unit
 ) {
+    val notes by viewModel.notes.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
+    val currentSortOrder by settingsViewModel.currentSortOrder.collectAsState()
+
+    // Sync sort order dari settings ke noteViewModel
+    LaunchedEffect(currentSortOrder) {
+        viewModel.updateSortOrder(currentSortOrder)
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -63,6 +83,25 @@ fun NoteListScreen(
                 }
             }
 
+            // Search Bar
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { viewModel.updateSearchQuery(it) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                placeholder = { Text("Cari catatan...", color = GlassTheme.colors.TextMuted) },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.White) },
+                shape = RoundedCornerShape(15.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = GlassTheme.colors.Violet,
+                    unfocusedBorderColor = GlassTheme.colors.GlassBorder2,
+                    focusedContainerColor = GlassTheme.colors.GlassBg,
+                    unfocusedContainerColor = GlassTheme.colors.GlassBg,
+                    cursorColor = Color.White
+                )
+            )
+
             // List notes
             LazyColumn(
                 contentPadding = PaddingValues(
@@ -99,16 +138,17 @@ fun NoteListScreen(
 
 @Composable
 fun NoteCard(
-    note: Note,
+    note: NoteEntity,
     onClick: () -> Unit,
     onToggleFavorite: () -> Unit
 ) {
-    val accentColor = when (note.color) {
-        NoteColor.VIOLET -> GlassTheme.colors.Violet
-        NoteColor.TEAL   -> GlassTheme.colors.Teal
-        NoteColor.PINK   -> GlassTheme.colors.Pink
-        NoteColor.GOLD   -> GlassTheme.colors.Gold
-        NoteColor.SKY    -> GlassTheme.colors.Sky
+    val accentColor = when (note.color_name) {
+        "VIOLET" -> GlassTheme.colors.Violet
+        "TEAL"   -> GlassTheme.colors.Teal
+        "PINK"   -> GlassTheme.colors.Pink
+        "GOLD"   -> GlassTheme.colors.Gold
+        "SKY"    -> GlassTheme.colors.Sky
+        else     -> GlassTheme.colors.Violet
     }
 
     Box(
@@ -155,7 +195,7 @@ fun NoteCard(
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    note.createdAt,
+                    "Dibuat pada: ${note.created_at}", // Bisa diformat lebih rapi
                     fontSize = 11.sp,
                     color = GlassTheme.colors.TextMuted
                 )
@@ -171,7 +211,7 @@ fun NoteCard(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    if (note.isFavorite) "❤" else "🤍",
+                    if (note.is_favorite == 1L) "❤" else "🤍",
                     fontSize = 16.sp
                 )
             }

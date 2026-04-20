@@ -31,23 +31,41 @@ import org.garis.pam.viewmodel.NewsViewModel
 import org.garis.pam.screens.news.NewsListScreen
 import org.garis.pam.screens.news.NewsDetailScreen
 
+import org.garis.pam.db.NotesDatabase
+import org.garis.pam.data.NoteRepository
+import org.garis.pam.data.DatabaseDriverFactory
+import org.garis.pam.data.SettingsManager
+import org.garis.pam.viewmodel.SettingsViewModel
+import org.garis.pam.screens.SettingsScreen
+
 @Composable
 fun AppNavigation(
     profileViewModel: ProfileViewModel,
-    noteViewModel: NoteViewModel,
     isDarkMode: Boolean,
-    onToggleDark: () -> Unit
+    onToggleDark: () -> Unit,
+    databaseDriverFactory: DatabaseDriverFactory
 ) {
     val navController = rememberNavController()
-    val noteUiState by noteViewModel.uiState.collectAsState()
+    
+    // 1. Inisialisasi Database SQLite
+    val notesDatabase = remember { NotesDatabase(databaseDriverFactory.createDriver()) }
+    
+    // 2. Inisialisasi Repository
+    val noteRepository = remember { NoteRepository(notesDatabase) }
+    val settingsManager = remember { SettingsManager() }
+    
+    // 3. Inisialisasi ViewModel
+    val noteViewModel: NoteViewModel = viewModel { NoteViewModel(noteRepository) }
+    val settingsViewModel: SettingsViewModel = viewModel { SettingsViewModel(settingsManager) }
+
+    val favoriteNotes by noteViewModel.favoriteNotes.collectAsState()
+    val selectedNote by noteViewModel.selectedNote.collectAsState()
     val profileUiState by profileViewModel.uiState.collectAsState()
     val newsRepository = remember { NewsRepository(HttpClientFactory.create()) }
     val newsViewModel: NewsViewModel = viewModel { NewsViewModel(newsRepository) }
 
     Scaffold(
         bottomBar = {
-            // Hanya tampilkan bottom nav di tab utama,
-            // sembunyikan saat di detail/add/edit screen
             val currentRoute = navController
                 .currentBackStackEntryAsState().value?.destination?.route
             val showBottomNav = currentRoute in listOf(
@@ -72,23 +90,33 @@ fun AppNavigation(
             // ── TAB: Notes ──
             composable(Screen.Notes.route) {
                 NoteListScreen(
-                    notes            = noteUiState.notes,
+                    viewModel        = noteViewModel,
+                    settingsViewModel = settingsViewModel,
                     onNoteClick      = { noteId ->
+                        noteViewModel.selectNote(noteId)
                         navController.navigate(Screen.NoteDetail.createRoute(noteId))
                     },
-                    onAddClick       = { navController.navigate(Screen.AddNote.route) },
-                    onToggleFavorite = noteViewModel::toggleFavorite
+                    onAddClick       = { 
+                        noteViewModel.clearSelectedNote()
+                        navController.navigate(Screen.AddNote.route) 
+                    },
+                    onToggleFavorite = { noteId ->
+                        noteViewModel.toggleFavorite(noteId)
+                    }
                 )
             }
 
             // ── TAB: Favorites ──
             composable(Screen.Favorites.route) {
                 FavoritesScreen(
-                    favorites        = noteUiState.notes.filter { it.isFavorite },
+                    favorites        = favoriteNotes,
                     onNoteClick      = { noteId ->
+                        noteViewModel.selectNote(noteId)
                         navController.navigate(Screen.NoteDetail.createRoute(noteId))
                     },
-                    onToggleFavorite = noteViewModel::toggleFavorite
+                    onToggleFavorite = { noteId ->
+                        noteViewModel.toggleFavorite(noteId)
+                    }
                 )
             }
 
@@ -111,7 +139,7 @@ fun AppNavigation(
                     onEditClick  = {
                         navController.navigate("edit_profile")
                     },
-                    onToggleDark = onToggleDark
+                    settingsViewModel = settingsViewModel
                 )
             }
 
@@ -130,19 +158,17 @@ fun AppNavigation(
             composable(
                 route = Screen.NoteDetail.route,
                 arguments = listOf(
-                    navArgument("noteId") { type = NavType.IntType }
+                    navArgument("noteId") { type = NavType.LongType }
                 )
-            ) { backStackEntry ->
-                val noteId = backStackEntry.arguments?.getInt("noteId") ?: 0
-                val note = noteViewModel.getNoteById(noteId)
-                note?.let {
+            ) {
+                selectedNote?.let {
                     NoteDetailScreen(
                         note             = it,
                         onBack           = { navController.popBackStack() },
                         onEditClick      = { id ->
                             navController.navigate(Screen.EditNote.createRoute(id))
                         },
-                        onToggleFavorite = noteViewModel::toggleFavorite,
+                        onToggleFavorite = { id -> noteViewModel.toggleFavorite(id) },
                         onDelete         = { id ->
                             noteViewModel.deleteNote(id)
                             navController.popBackStack()
@@ -154,18 +180,7 @@ fun AppNavigation(
             // ── Add Note ──
             composable(Screen.AddNote.route) {
                 AddEditNoteScreen(
-                    title           = noteUiState.editTitle,
-                    content         = noteUiState.editContent,
-                    isEditMode      = false,
-                    onTitleChange   = noteViewModel::onTitleChange,
-                    onContentChange = noteViewModel::onContentChange,
-                    onSave          = {
-                        noteViewModel.addNote(
-                            noteUiState.editTitle,
-                            noteUiState.editContent
-                        )
-                        navController.popBackStack()
-                    },
+                    viewModel = noteViewModel,
                     onBack = { navController.popBackStack() }
                 )
             }
@@ -174,26 +189,13 @@ fun AppNavigation(
             composable(
                 route = Screen.EditNote.route,
                 arguments = listOf(
-                    navArgument("noteId") { type = NavType.IntType }
+                    navArgument("noteId") { type = NavType.LongType }
                 )
-            ) { backStackEntry ->
-                val noteId = backStackEntry.arguments?.getInt("noteId") ?: 0
-                val note = noteViewModel.getNoteById(noteId)
-                note?.let {
-                    noteViewModel.selectNote(it)
-                    AddEditNoteScreen(
-                        title           = noteUiState.editTitle,
-                        content         = noteUiState.editContent,
-                        isEditMode      = true,
-                        onTitleChange   = noteViewModel::onTitleChange,
-                        onContentChange = noteViewModel::onContentChange,
-                        onSave          = {
-                            noteViewModel.saveNote(noteId)
-                            navController.popBackStack()
-                        },
-                        onBack = { navController.popBackStack() }
-                    )
-                }
+            ) {
+                AddEditNoteScreen(
+                    viewModel = noteViewModel,
+                    onBack = { navController.popBackStack() }
+                )
             }
 
             // ── Edit Profile ──
@@ -220,7 +222,6 @@ fun AppNavigation(
     }
 }
 
-// ── Glass Bottom Navigation Bar ──
 @Composable
 fun GlassBottomNav(navController: NavController) {
     val currentRoute = navController
@@ -261,7 +262,7 @@ fun GlassBottomNav(navController: NavController) {
                     .clip(RoundedCornerShape(12.dp))
                     .clickable {
                         navController.navigate(route) {
-                            popUpTo(navController.graph.startDestinationId) {
+                            popUpTo(Screen.Notes.route) {
                                 saveState = true
                             }
                             launchSingleTop = true

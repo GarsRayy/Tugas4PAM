@@ -8,6 +8,7 @@ sealed class Screen(val route: String) {
     object Favorites : Screen("favorites")
     object Profile   : Screen("profile")
     object News : Screen("news")
+    object Settings : Screen("settings")
     object NewsDetail : Screen("news_detail")
 
     // ── Notes stack ──
@@ -16,9 +17,9 @@ sealed class Screen(val route: String) {
 
     // NoteDetail & EditNote pakai argument noteId
     object NoteDetail : Screen("note_detail/{noteId}") {
-        fun createRoute(noteId: Int) = "note_detail/$noteId"
+        fun createRoute(noteId: Long) = "note_detail/$noteId"
     }
     object EditNote   : Screen("edit_note/{noteId}") {
-        fun createRoute(noteId: Int) = "edit_note/$noteId"
+        fun createRoute(noteId: Long) = "edit_note/$noteId"
     }
 }
