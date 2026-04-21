@@ -107,6 +107,9 @@ fun AppNavigation(
                     },
                     onTogglePin = { noteId: Long ->
                         noteViewModel.togglePin(noteId)
+                    },
+                    onArchiveClick = {
+                        navController.navigate(Screen.Archive.route)
                     }
                 )
             }
@@ -177,12 +180,25 @@ fun AppNavigation(
                             navController.navigate(Screen.EditNote.createRoute(id))
                         },
                         onToggleFavorite = { id -> noteViewModel.toggleFavorite(id) },
+                        onArchiveClick   = { id -> noteViewModel.toggleArchive(id) },
                         onDelete         = { id ->
                             noteViewModel.deleteNote(id)
                             navController.popBackStack()
                         }
                     )
                 }
+            }
+
+            // ── Archive ──
+            composable(Screen.Archive.route) {
+                ArchiveScreen(
+                    viewModel = noteViewModel,
+                    onNoteClick = { noteId ->
+                        noteViewModel.selectNote(noteId)
+                        navController.navigate(Screen.NoteDetail.createRoute(noteId))
+                    },
+                    onBack = { navController.popBackStack() }
+                )
             }
 
             // ── Add Note ──

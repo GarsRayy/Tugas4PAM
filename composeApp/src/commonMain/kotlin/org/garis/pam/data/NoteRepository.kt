@@ -46,6 +46,13 @@ class NoteRepository(database: NotesDatabase) {
             .mapToList(Dispatchers.Default)
     }
 
+    // READ: Mengambil catatan yang diarsip
+    fun getArchivedNotes(): Flow<List<NoteEntity>> {
+        return queries.selectArchived()
+            .asFlow()
+            .mapToList(Dispatchers.Default)
+    }
+
     // READ: Mengambil 1 catatan spesifik
     suspend fun getNoteById(id: Long): NoteEntity? {
         return withContext(Dispatchers.Default) {
@@ -54,18 +61,18 @@ class NoteRepository(database: NotesDatabase) {
     }
 
     // CREATE: Menambahkan catatan baru
-    suspend fun insertNote(title: String, content: String, colorName: String = "VIOLET") {
+    suspend fun insertNote(title: String, content: String, tags: String = "", colorName: String = "VIOLET") {
         val now = Clock.System.now().toEpochMilliseconds()
         withContext(Dispatchers.Default) {
-            queries.insert(title, content, 0L, 0L, colorName, now, now)
+            queries.insert(title, content, 0L, 0L, 0L, tags, colorName, now, now)
         }
     }
 
     // UPDATE: Memperbarui catatan yang sudah ada
-    suspend fun updateNote(id: Long, title: String, content: String, colorName: String) {
+    suspend fun updateNote(id: Long, title: String, content: String, tags: String, colorName: String) {
         val now = Clock.System.now().toEpochMilliseconds()
         withContext(Dispatchers.Default) {
-            queries.update(title, content, colorName, now, id)
+            queries.update(title, content, colorName, tags, now, id)
         }
     }
 
@@ -80,6 +87,13 @@ class NoteRepository(database: NotesDatabase) {
     suspend fun togglePin(id: Long) {
         withContext(Dispatchers.Default) {
             queries.togglePinned(id)
+        }
+    }
+
+    // TOGGLE ARCHIVE
+    suspend fun toggleArchive(id: Long) {
+        withContext(Dispatchers.Default) {
+            queries.toggleArchived(id)
         }
     }
 

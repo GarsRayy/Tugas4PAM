@@ -35,7 +35,8 @@ fun NoteListScreen(
     onNoteClick: (Long) -> Unit,       // navigate ke detail dengan noteId
     onAddClick: () -> Unit,           // navigate ke add note
     onToggleFavorite: (Long) -> Unit,
-    onTogglePin: (Long) -> Unit
+    onTogglePin: (Long) -> Unit,
+    onArchiveClick: () -> Unit
 ) {
     val notes by viewModel.notes.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -81,6 +82,20 @@ fun NoteListScreen(
                         color = GlassTheme.colors.TextMuted,
                         modifier = Modifier.padding(top = 4.dp)
                     )
+                }
+
+                // Tombol Archive di pojok kanan atas header
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(GlassTheme.colors.GlassBg)
+                        .border(1.dp, GlassTheme.colors.GlassBorder, CircleShape)
+                        .clickable(onClick = onArchiveClick),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("📦", fontSize = 18.sp)
                 }
             }
 
@@ -201,6 +216,25 @@ fun NoteCard(
                     lineHeight = 18.sp
                 )
                 Spacer(Modifier.height(6.dp))
+                if (note.tags.isNotBlank()) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        note.tags.split(" ").filter { it.startsWith("#") }.take(3).forEach { tag ->
+                            Surface(
+                                color = accentColor.copy(alpha = 0.15f),
+                                shape = RoundedCornerShape(4.dp)
+                            ) {
+                                Text(
+                                    tag,
+                                    fontSize = 9.sp,
+                                    color = accentColor,
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(6.dp))
+                }
                 Text(
                     "Dibuat pada: ${note.created_at}", // Bisa diformat lebih rapi
                     fontSize = 11.sp,

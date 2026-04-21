@@ -21,6 +21,7 @@ fun NoteDetailScreen(
     onBack: () -> Unit,                // popBackStack()
     onEditClick: (Long) -> Unit,        // navigate ke EditNote dengan noteId
     onToggleFavorite: (Long) -> Unit,
+    onArchiveClick: (Long) -> Unit,
     onDelete: (Long) -> Unit
 ) {
     val accentColor = GlassTheme.colors.Violet
@@ -67,8 +68,22 @@ fun NoteDetailScreen(
                         .clickable { onToggleFavorite(note.id) },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("🤍", fontSize = 16.sp)
+                    Text(if (note.is_favorite == 1L) "❤️" else "🤍", fontSize = 16.sp)
                 }
+
+                // Archive
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .border(1.dp, GlassTheme.colors.GlassBorder, CircleShape)
+                        .background(GlassTheme.colors.GlassBg)
+                        .clickable { onArchiveClick(note.id) },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(if (note.is_archived == 1L) "📥" else "📦", fontSize = 16.sp)
+                }
+
                 // Edit
                 Box(
                     modifier = Modifier
@@ -94,13 +109,25 @@ fun NoteDetailScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
         ) {
-            // Accent color dot
-            Box(
-                modifier = Modifier
-                    .size(12.dp)
-                    .clip(CircleShape)
-                    .background(accentColor)
-            )
+            // Accent color dot & Tags
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(12.dp)
+                        .clip(CircleShape)
+                        .background(accentColor)
+                )
+                
+                if (note.tags.isNotBlank()) {
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        note.tags,
+                        fontSize = 12.sp,
+                        color = GlassTheme.colors.Violet,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
             Spacer(Modifier.height(12.dp))
 
             Text(
@@ -113,7 +140,7 @@ fun NoteDetailScreen(
 
             Spacer(Modifier.height(8.dp))
             Text(
-                note.created_at.toString(),
+                note.created_at.toString(), // TODO: Format date
                 fontSize = 12.sp,
                 color = GlassTheme.colors.TextMuted
             )
@@ -130,12 +157,7 @@ fun NoteDetailScreen(
 
             Spacer(Modifier.height(20.dp))
 
-            Text(
-                note.content,
-                fontSize = 15.sp,
-                color = GlassTheme.colors.TextSecond,
-                lineHeight = 24.sp
-            )
+            MarkdownText(note.content)
 
             Spacer(Modifier.height(40.dp))
 
