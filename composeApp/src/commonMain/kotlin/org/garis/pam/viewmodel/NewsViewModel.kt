@@ -6,8 +6,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.garis.pam.data.Article
-import org.garis.pam.data.NewsRepository
+import org.garis.pam.data.model.Article
+import org.garis.pam.data.repository.NewsRepository
 
 // Sealed class untuk mengelola UI State dengan aman
 sealed class NewsUiState {

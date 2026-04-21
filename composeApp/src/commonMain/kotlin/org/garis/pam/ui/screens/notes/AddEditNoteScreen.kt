@@ -1,4 +1,4 @@
-package org.garis.pam.screens.notes
+package org.garis.pam.ui.screens.notes
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -12,10 +12,10 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import org.garis.pam.GlassTheme
-import org.garis.pam.data.NoteColor
-import org.garis.pam.ui.GlassTextField  // reuse dari minggu lalu
 import androidx.compose.ui.draw.clip
-
+import androidx.compose.ui.draw.scale
+import org.garis.pam.ui.components.GlassTextField
+import org.garis.pam.ui.components.MarkdownText
 import org.garis.pam.viewmodel.NoteViewModel
 
 @Composable
@@ -27,8 +27,11 @@ fun AddEditNoteScreen(
     
     var titleState by remember(selectedNote) { mutableStateOf(selectedNote?.title ?: "") }
     var contentState by remember(selectedNote) { mutableStateOf(selectedNote?.content ?: "") }
+    var tagsState by remember(selectedNote) { mutableStateOf(selectedNote?.tags ?: "") }
     var colorNameState by remember(selectedNote) { mutableStateOf(selectedNote?.color_name ?: "VIOLET") }
     
+    var isPreviewMode by remember { mutableStateOf(false) }
+
     val colors = listOf("VIOLET", "TEAL", "PINK", "GOLD", "SKY")
     
     Column(
@@ -82,13 +85,58 @@ fun AddEditNoteScreen(
             onValueChange = { titleState = it }
         )
 
-        // TextField Isi
+        // Tags Input
         GlassTextField(
-            label = "Isi catatan...",
-            value = contentState,
-            onValueChange = { contentState = it },
-            maxLines = 12
+            label = "Tags (contoh: #Kerja #Ide)",
+            value = tagsState,
+            onValueChange = { tagsState = it }
         )
+
+        // Mode Switcher (Edit vs Preview)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                if (isPreviewMode) "👁 Preview Mode" else "✏ Edit Mode",
+                fontSize = 12.sp,
+                color = GlassTheme.colors.Violet,
+                fontWeight = FontWeight.Bold
+            )
+            Switch(
+                checked = isPreviewMode,
+                onCheckedChange = { isPreviewMode = it },
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = GlassTheme.colors.Violet,
+                    checkedTrackColor = GlassTheme.colors.Violet.copy(alpha = 0.3f)
+                ),
+                modifier = Modifier.scale(0.8f)
+            )
+        }
+
+        if (isPreviewMode) {
+            // Markdown Preview
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 200.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(GlassTheme.colors.GlassBg)
+                    .border(1.dp, GlassTheme.colors.GlassBorder2, RoundedCornerShape(16.dp))
+                    .padding(16.dp)
+            ) {
+                MarkdownText(contentState)
+            }
+        } else {
+            // TextField Isi
+            GlassTextField(
+                label = "Isi catatan (mendukung **tebal** dan - list)",
+                value = contentState,
+                onValueChange = { contentState = it },
+                maxLines = 12
+            )
+        }
 
         Spacer(Modifier.height(8.dp))
         
@@ -128,7 +176,7 @@ fun AddEditNoteScreen(
         Button(
             onClick = { 
                 if (titleState.isNotBlank()) {
-                    viewModel.saveNote(titleState, contentState, colorNameState)
+                    viewModel.saveNote(titleState, contentState, tagsState, colorNameState)
                     onBack() 
                 }
             },
@@ -156,5 +204,7 @@ fun AddEditNoteScreen(
                 )
             }
         }
+        
+        Spacer(Modifier.height(40.dp))
     }
 }

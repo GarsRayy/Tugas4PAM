@@ -1,4 +1,4 @@
-package org.garis.pam.screens
+package org.garis.pam.ui.screens.favorites
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -12,13 +12,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import org.garis.pam.GlassTheme
 import org.garis.pam.db.NoteEntity
-import org.garis.pam.screens.notes.NoteCard
+import org.garis.pam.ui.screens.notes.NoteCard
 
 @Composable
 fun FavoritesScreen(
     favorites: List<NoteEntity>,
     onNoteClick: (Long) -> Unit,
-    onToggleFavorite: (Long) -> Unit
+    onToggleFavorite: (Long) -> Unit,
+    onTogglePin: (Long) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -83,7 +84,8 @@ fun FavoritesScreen(
                     NoteCard(
                         note = note,
                         onClick = { onNoteClick(note.id) },
-                        onToggleFavorite = { onToggleFavorite(note.id) }
+                        onToggleFavorite = { onToggleFavorite(note.id) },
+                        onTogglePin = { onTogglePin(note.id) }
                     )
                 }
             }

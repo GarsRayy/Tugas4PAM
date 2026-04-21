@@ -1,4 +1,4 @@
-package org.garis.pam.data
+package org.garis.pam.data.remote
 
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*

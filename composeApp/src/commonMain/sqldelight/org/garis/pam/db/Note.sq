@@ -5,22 +5,29 @@ CREATE TABLE NoteEntity (
     title TEXT NOT NULL,
     content TEXT NOT NULL,
     is_favorite INTEGER NOT NULL DEFAULT 0,
+    is_pinned INTEGER NOT NULL DEFAULT 0,
+    is_archived INTEGER NOT NULL DEFAULT 0,
+    tags TEXT NOT NULL DEFAULT '',
     color_name TEXT NOT NULL DEFAULT 'VIOLET',
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL
 );
 
--- Mengambil semua catatan, diurutkan dari yang terbaru
+-- Mengambil semua catatan (non-arsip), diurutkan dari yang dipin dulu, lalu yang terbaru
 selectAll:
-SELECT * FROM NoteEntity ORDER BY updated_at DESC;
+SELECT * FROM NoteEntity WHERE is_archived = 0 ORDER BY is_pinned DESC, updated_at DESC;
 
--- Mengambil semua catatan, diurutkan dari yang terlama
+-- Mengambil semua catatan (non-arsip), diurutkan dari yang dipin dulu, lalu yang terlama
 selectAllOldest:
-SELECT * FROM NoteEntity ORDER BY updated_at ASC;
+SELECT * FROM NoteEntity WHERE is_archived = 0 ORDER BY is_pinned DESC, updated_at ASC;
 
--- Mengambil catatan favorit
+-- Mengambil catatan favorit (non-arsip)
 selectFavorites:
-SELECT * FROM NoteEntity WHERE is_favorite = 1 ORDER BY updated_at DESC;
+SELECT * FROM NoteEntity WHERE is_favorite = 1 AND is_archived = 0 ORDER BY is_pinned DESC, updated_at DESC;
+
+-- Mengambil catatan yang diarsip
+selectArchived:
+SELECT * FROM NoteEntity WHERE is_archived = 1 ORDER BY updated_at DESC;
 
 -- Mengambil 1 catatan berdasarkan ID
 selectById:
@@ -28,28 +35,36 @@ SELECT * FROM NoteEntity WHERE id = ?;
 
 -- Menambahkan catatan baru
 insert:
-INSERT INTO NoteEntity(title, content, is_favorite, color_name, created_at, updated_at)
-VALUES (?, ?, ?, ?, ?, ?);
+INSERT INTO NoteEntity(title, content, is_favorite, is_pinned, is_archived, tags, color_name, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- Memperbarui catatan
 update:
-UPDATE NoteEntity SET title = ?, content = ?, color_name = ?, updated_at = ? WHERE id = ?;
+UPDATE NoteEntity SET title = ?, content = ?, color_name = ?, tags = ?, updated_at = ? WHERE id = ?;
 
 -- Toggle Favorite
 toggleFavorite:
 UPDATE NoteEntity SET is_favorite = CASE WHEN is_favorite = 1 THEN 0 ELSE 1 END WHERE id = ?;
 
+-- Toggle Pin
+togglePinned:
+UPDATE NoteEntity SET is_pinned = CASE WHEN is_pinned = 1 THEN 0 ELSE 1 END WHERE id = ?;
+
+-- Toggle Archive
+toggleArchived:
+UPDATE NoteEntity SET is_archived = CASE WHEN is_archived = 1 THEN 0 ELSE 1 END WHERE id = ?;
+
 -- Menghapus catatan
 delete:
 DELETE FROM NoteEntity WHERE id = ?;
 
--- Fitur pencarian
+-- Fitur pencarian (non-arsip)
 search:
 SELECT * FROM NoteEntity
-WHERE (title LIKE ('%' || :query || '%') OR content LIKE ('%' || :query || '%'))
-ORDER BY updated_at DESC;
+WHERE is_archived = 0 AND (title LIKE ('%' || :query || '%') OR content LIKE ('%' || :query || '%') OR tags LIKE ('%' || :query || '%'))
+ORDER BY is_pinned DESC, updated_at DESC;
 
 searchOldest:
 SELECT * FROM NoteEntity
-WHERE (title LIKE ('%' || :query || '%') OR content LIKE ('%' || :query || '%'))
-ORDER BY updated_at ASC;
+WHERE is_archived = 0 AND (title LIKE ('%' || :query || '%') OR content LIKE ('%' || :query || '%') OR tags LIKE ('%' || :query || '%'))
+ORDER BY is_pinned DESC, updated_at ASC;

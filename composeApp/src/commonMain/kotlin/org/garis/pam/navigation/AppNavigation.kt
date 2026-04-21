@@ -19,24 +19,21 @@ import androidx.navigation.navArgument
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.graphics.Color
 import org.garis.pam.GlassTheme
-import org.garis.pam.screens.FavoritesScreen
-import org.garis.pam.screens.notes.*
-import org.garis.pam.ui.ProfileScreen
-import org.garis.pam.ui.EditProfileScreen
-import org.garis.pam.viewmodel.NoteViewModel
-import org.garis.pam.viewmodel.ProfileViewModel
-import org.garis.pam.data.NewsRepository
-import org.garis.pam.data.HttpClientFactory
-import org.garis.pam.viewmodel.NewsViewModel
-import org.garis.pam.screens.news.NewsListScreen
-import org.garis.pam.screens.news.NewsDetailScreen
-
-import org.garis.pam.db.NotesDatabase
-import org.garis.pam.data.NoteRepository
-import org.garis.pam.data.DatabaseDriverFactory
-import org.garis.pam.data.SettingsManager
-import org.garis.pam.viewmodel.SettingsViewModel
-import org.garis.pam.screens.SettingsScreen
+import org.garis.pam.ui.screens.favorites.FavoritesScreen
+import org.garis.pam.ui.screens.notes.*
+import org.garis.pam.ui.screens.profile.ProfileScreen
+import org.garis.pam.ui.screens.profile.EditProfileScreen
+import org.garis.pam.ui.screens.news.NewsListScreen
+import org.garis.pam.ui.screens.news.NewsDetailScreen
+import org.garis.pam.ui.screens.settings.SettingsScreen
+import org.garis.pam.viewmodel.*
+import org.garis.pam.data.local.DatabaseDriverFactory
+import org.garis.pam.data.local.SettingsManager
+import org.garis.pam.data.repository.NoteRepository
+import org.garis.pam.data.repository.NewsRepository
+import org.garis.pam.data.remote.HttpClientFactory
+import org.garis.pam.data.model.Article
+import org.garis.pam.db.*
 
 @Composable
 fun AppNavigation(
@@ -92,7 +89,7 @@ fun AppNavigation(
                 NoteListScreen(
                     viewModel        = noteViewModel,
                     settingsViewModel = settingsViewModel,
-                    onNoteClick      = { noteId ->
+                    onNoteClick      = { noteId: Long ->
                         noteViewModel.selectNote(noteId)
                         navController.navigate(Screen.NoteDetail.createRoute(noteId))
                     },
@@ -100,8 +97,14 @@ fun AppNavigation(
                         noteViewModel.clearSelectedNote()
                         navController.navigate(Screen.AddNote.route) 
                     },
-                    onToggleFavorite = { noteId ->
+                    onToggleFavorite = { noteId: Long ->
                         noteViewModel.toggleFavorite(noteId)
+                    },
+                    onTogglePin = { noteId: Long ->
+                        noteViewModel.togglePin(noteId)
+                    },
+                    onArchiveClick = {
+                        navController.navigate(Screen.Archive.route)
                     }
                 )
             }
@@ -110,12 +113,15 @@ fun AppNavigation(
             composable(Screen.Favorites.route) {
                 FavoritesScreen(
                     favorites        = favoriteNotes,
-                    onNoteClick      = { noteId ->
+                    onNoteClick      = { noteId: Long ->
                         noteViewModel.selectNote(noteId)
                         navController.navigate(Screen.NoteDetail.createRoute(noteId))
                     },
-                    onToggleFavorite = { noteId ->
+                    onToggleFavorite = { noteId: Long ->
                         noteViewModel.toggleFavorite(noteId)
+                    },
+                    onTogglePin = { noteId: Long ->
+                        noteViewModel.togglePin(noteId)
                     }
                 )
             }
@@ -124,7 +130,7 @@ fun AppNavigation(
             composable(Screen.News.route) {
                 NewsListScreen(
                     viewModel = newsViewModel,
-                    onNavigateToDetail = { article ->
+                    onNavigateToDetail = { article: Article ->
                         newsViewModel.selectArticle(article)
                         navController.navigate(Screen.NewsDetail.route)
                     }
@@ -169,12 +175,25 @@ fun AppNavigation(
                             navController.navigate(Screen.EditNote.createRoute(id))
                         },
                         onToggleFavorite = { id -> noteViewModel.toggleFavorite(id) },
+                        onArchiveClick   = { id -> noteViewModel.toggleArchive(id) },
                         onDelete         = { id ->
                             noteViewModel.deleteNote(id)
                             navController.popBackStack()
                         }
                     )
                 }
+            }
+
+            // ── Archive ──
+            composable(Screen.Archive.route) {
+                ArchiveScreen(
+                    viewModel = noteViewModel,
+                    onNoteClick = { noteId ->
+                        noteViewModel.selectNote(noteId)
+                        navController.navigate(Screen.NoteDetail.createRoute(noteId))
+                    },
+                    onBack = { navController.popBackStack() }
+                )
             }
 
             // ── Add Note ──

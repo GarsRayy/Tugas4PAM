@@ -1,4 +1,4 @@
-package org.garis.pam.screens.news
+package org.garis.pam.ui.screens.news
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import org.garis.pam.GlassTheme
-import org.garis.pam.data.Article
+import org.garis.pam.data.model.Article
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

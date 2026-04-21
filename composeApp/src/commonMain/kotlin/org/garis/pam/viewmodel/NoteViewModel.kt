@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import org.garis.pam.data.NoteRepository
+import org.garis.pam.data.repository.NoteRepository
 import org.garis.pam.db.NoteEntity
 
 class NoteViewModel(private val repository: NoteRepository) : ViewModel() {
@@ -40,6 +40,13 @@ class NoteViewModel(private val repository: NoteRepository) : ViewModel() {
             initialValue = emptyList()
         )
 
+    val archivedNotes: StateFlow<List<NoteEntity>> = repository.getArchivedNotes()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
     private val _selectedNote = MutableStateFlow<NoteEntity?>(null)
     val selectedNote: StateFlow<NoteEntity?> = _selectedNote.asStateFlow()
 
@@ -51,13 +58,13 @@ class NoteViewModel(private val repository: NoteRepository) : ViewModel() {
         _sortOrder.value = order
     }
 
-    fun saveNote(title: String, content: String, colorName: String = "VIOLET") {
+    fun saveNote(title: String, content: String, tags: String = "", colorName: String = "VIOLET") {
         viewModelScope.launch {
             val currentNote = _selectedNote.value
             if (currentNote == null) {
-                repository.insertNote(title, content, colorName)
+                repository.insertNote(title, content, tags, colorName)
             } else {
-                repository.updateNote(currentNote.id, title, content, colorName)
+                repository.updateNote(currentNote.id, title, content, tags, colorName)
             }
             // Kosongkan pilihan setelah disimpan
             clearSelectedNote()
@@ -67,6 +74,18 @@ class NoteViewModel(private val repository: NoteRepository) : ViewModel() {
     fun toggleFavorite(id: Long) {
         viewModelScope.launch {
             repository.toggleFavorite(id)
+        }
+    }
+
+    fun togglePin(id: Long) {
+        viewModelScope.launch {
+            repository.togglePin(id)
+        }
+    }
+
+    fun toggleArchive(id: Long) {
+        viewModelScope.launch {
+            repository.toggleArchive(id)
         }
     }
 

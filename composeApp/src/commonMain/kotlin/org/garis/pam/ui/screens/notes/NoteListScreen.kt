@@ -1,4 +1,4 @@
-package org.garis.pam.screens.notes
+package org.garis.pam.ui.screens.notes
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
@@ -15,7 +15,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 import org.garis.pam.GlassTheme
 import org.garis.pam.db.NoteEntity
-import org.garis.pam.data.NoteColor
 import androidx.compose.ui.draw.clip
 
 import androidx.compose.material.icons.Icons
@@ -26,21 +25,21 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.RectangleShape
 
 @Composable
 fun NoteListScreen(
     viewModel: NoteViewModel,
     settingsViewModel: SettingsViewModel,
-    onNoteClick: (Long) -> Unit,       // navigate ke detail dengan noteId
-    onAddClick: () -> Unit,           // navigate ke add note
-    onToggleFavorite: (Long) -> Unit
+    onNoteClick: (Long) -> Unit,
+    onAddClick: () -> Unit,
+    onToggleFavorite: (Long) -> Unit,
+    onTogglePin: (Long) -> Unit,
+    onArchiveClick: () -> Unit
 ) {
     val notes by viewModel.notes.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val currentSortOrder by settingsViewModel.currentSortOrder.collectAsState()
 
-    // Sync sort order dari settings ke noteViewModel
     LaunchedEffect(currentSortOrder) {
         viewModel.updateSortOrder(currentSortOrder)
     }
@@ -55,7 +54,6 @@ fun NoteListScreen(
             )
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-
             // Header
             Box(
                 modifier = Modifier
@@ -81,6 +79,19 @@ fun NoteListScreen(
                         modifier = Modifier.padding(top = 4.dp)
                     )
                 }
+
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(GlassTheme.colors.GlassBg)
+                        .border(1.dp, GlassTheme.colors.GlassBorder, CircleShape)
+                        .clickable(onClick = onArchiveClick),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("📦", fontSize = 18.sp)
+                }
             }
 
             // Search Bar
@@ -102,7 +113,6 @@ fun NoteListScreen(
                 )
             )
 
-            // List notes
             LazyColumn(
                 contentPadding = PaddingValues(
                     start = 16.dp, end = 16.dp,
@@ -115,13 +125,13 @@ fun NoteListScreen(
                     NoteCard(
                         note = note,
                         onClick = { onNoteClick(note.id) },
-                        onToggleFavorite = { onToggleFavorite(note.id) }
+                        onToggleFavorite = { onToggleFavorite(note.id) },
+                        onTogglePin = { onTogglePin(note.id) }
                     )
                 }
             }
         }
 
-        // FAB tambah note
         FloatingActionButton(
             onClick = onAddClick,
             modifier = Modifier
@@ -136,85 +146,3 @@ fun NoteListScreen(
     }
 }
 
-@Composable
-fun NoteCard(
-    note: NoteEntity,
-    onClick: () -> Unit,
-    onToggleFavorite: () -> Unit
-) {
-    val accentColor = when (note.color_name) {
-        "VIOLET" -> GlassTheme.colors.Violet
-        "TEAL"   -> GlassTheme.colors.Teal
-        "PINK"   -> GlassTheme.colors.Pink
-        "GOLD"   -> GlassTheme.colors.Gold
-        "SKY"    -> GlassTheme.colors.Sky
-        else     -> GlassTheme.colors.Violet
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .border(1.dp, GlassTheme.colors.GlassBorder, RoundedCornerShape(16.dp))
-            .background(GlassTheme.colors.GlassBg)
-            .clickable(onClick = onClick)
-    ) {
-        // Accent bar kiri
-        Box(
-            modifier = Modifier
-                .width(4.dp)
-                .height(60.dp)
-                .align(Alignment.CenterStart)
-                .background(accentColor, RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp))
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 12.dp, top = 14.dp, bottom = 14.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    note.title,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = GlassTheme.colors.TextPrimary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    note.content,
-                    fontSize = 12.sp,
-                    color = GlassTheme.colors.TextSecond,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    lineHeight = 18.sp
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    "Dibuat pada: ${note.created_at}", // Bisa diformat lebih rapi
-                    fontSize = 11.sp,
-                    color = GlassTheme.colors.TextMuted
-                )
-            }
-
-            // Favorite button
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(GlassTheme.colors.GlassBg)
-                    .clickable(onClick = onToggleFavorite),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    if (note.is_favorite == 1L) "❤" else "🤍",
-                    fontSize = 16.sp
-                )
-            }
-        }
-    }
-}

@@ -1,4 +1,4 @@
-package org.garis.pam.data
+package org.garis.pam.data.local
 
 import android.content.Context
 import app.cash.sqldelight.db.SqlDriver

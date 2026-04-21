@@ -1,4 +1,4 @@
-package org.garis.pam.data
+package org.garis.pam.data.repository
 
 import com.russhwolf.settings.Settings
 import io.ktor.client.*
@@ -6,6 +6,8 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.garis.pam.data.model.Article
+import org.garis.pam.data.model.NewsResponse
 
 class NewsRepository(private val client: HttpClient) {
     private val apiKey = "96cd83ec7f144282a5822d11e2ab5fad"

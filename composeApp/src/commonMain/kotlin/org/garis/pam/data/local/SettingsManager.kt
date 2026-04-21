@@ -1,4 +1,4 @@
-package org.garis.pam.data
+package org.garis.pam.data.local
 
 import com.russhwolf.settings.ExperimentalSettingsApi
 import com.russhwolf.settings.ObservableSettings

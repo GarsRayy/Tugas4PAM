@@ -1,4 +1,4 @@
-package org.garis.pam.data
+package org.garis.pam.data.model
 
 data class Note(
     val id: Long,
