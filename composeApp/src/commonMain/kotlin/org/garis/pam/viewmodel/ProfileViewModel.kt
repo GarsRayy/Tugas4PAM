@@ -5,8 +5,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.garis.pam.data.UserProfile
-import org.garis.pam.data.myProfile
+import org.garis.pam.data.model.UserProfile
+import org.garis.pam.data.model.myProfile
 
 // ── Data class UI State (sesuai materi hal 25) ──
 data class ProfileUiState(

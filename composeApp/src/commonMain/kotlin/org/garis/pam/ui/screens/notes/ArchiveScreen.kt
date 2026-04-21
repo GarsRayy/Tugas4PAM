@@ -1,4 +1,4 @@
-package org.garis.pam.screens.notes
+package org.garis.pam.ui.screens.notes
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*

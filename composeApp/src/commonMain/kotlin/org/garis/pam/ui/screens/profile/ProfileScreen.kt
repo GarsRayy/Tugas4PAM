@@ -1,21 +1,19 @@
-package org.garis.pam.ui
+package org.garis.pam.ui.screens.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import org.garis.pam.GlassTheme
-import org.garis.pam.data.UserProfile
+import org.garis.pam.data.model.UserProfile
 import org.garis.pam.viewmodel.SettingsViewModel
-import org.garis.pam.screens.SettingsScreen
+import org.garis.pam.ui.screens.settings.SettingsScreen
 
 @Composable
 fun ProfileScreen(

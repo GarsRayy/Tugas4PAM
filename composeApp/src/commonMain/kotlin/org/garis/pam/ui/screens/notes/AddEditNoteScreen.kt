@@ -1,4 +1,4 @@
-package org.garis.pam.screens.notes
+package org.garis.pam.ui.screens.notes
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -12,12 +12,10 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import org.garis.pam.GlassTheme
-import org.garis.pam.data.NoteColor
-import org.garis.pam.ui.GlassTextField  // reuse dari minggu lalu
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.text.withStyle
-
+import org.garis.pam.ui.components.GlassTextField
+import org.garis.pam.ui.components.MarkdownText
 import org.garis.pam.viewmodel.NoteViewModel
 
 @Composable
@@ -209,43 +207,4 @@ fun AddEditNoteScreen(
         
         Spacer(Modifier.height(40.dp))
     }
-}
-
-@Composable
-fun MarkdownText(text: String) {
-    val annotatedString = remember(text) {
-        androidx.compose.ui.text.buildAnnotatedString {
-            val lines = text.split("\n")
-            lines.forEachIndexed { index, line ->
-                var processedLine = line
-                
-                // Handle List
-                if (processedLine.trimStart().startsWith("- ")) {
-                    append("  • ")
-                    processedLine = processedLine.trimStart().substring(2)
-                }
-
-                // Handle Bold **text**
-                val boldRegex = "\\*\\*(.*?)\\*\\*".toRegex()
-                var lastIndex = 0
-                boldRegex.findAll(processedLine).forEach { match ->
-                    append(processedLine.substring(lastIndex, match.range.first))
-                    withStyle(androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append(match.groupValues[1])
-                    }
-                    lastIndex = match.range.last + 1
-                }
-                append(processedLine.substring(lastIndex))
-                
-                if (index < lines.size - 1) append("\n")
-            }
-        }
-    }
-    
-    Text(
-        text = annotatedString,
-        color = GlassTheme.colors.TextSecond,
-        fontSize = 15.sp,
-        lineHeight = 24.sp
-    )
 }

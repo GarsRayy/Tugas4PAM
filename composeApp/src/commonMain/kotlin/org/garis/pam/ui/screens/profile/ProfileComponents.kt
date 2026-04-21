@@ -1,16 +1,8 @@
-package org.garis.pam.ui
+package org.garis.pam.ui.screens.profile
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -22,33 +14,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -72,16 +42,12 @@ import org.jetbrains.compose.resources.painterResource
 import tugas3_profileapp.composeapp.generated.resources.Res
 import tugas3_profileapp.composeapp.generated.resources.profil
 import kotlin.math.PI
-import androidx.compose.animation.core.LinearEasing
 import kotlin.math.sin
 import kotlin.math.cos
 
 
 // ╔══════════════════════════════════════════╗
 //  COMPOSABLE 1 — HeroSection
-//  Padanan: <div class="hero"> di HTML
-//  Berisi: gradient bg + grid overlay + back btn
-//          + badge + foto profil (Image) + nama
 // ╚══════════════════════════════════════════╝
 @Composable
 fun HeroSection(
@@ -94,7 +60,6 @@ fun HeroSection(
 
     val infiniteTransition = rememberInfiniteTransition(label = "hero")
 
-    // Satu float untuk menggerakkan semua partikel bersama
     val particleTime by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue  = 1f,
@@ -104,7 +69,6 @@ fun HeroSection(
         ), label = "particleTime"
     )
 
-    // Pulse untuk dot partikel
     val dotPulse by infiniteTransition.animateFloat(
         initialValue = 0.4f,
         targetValue  = 1f,
@@ -114,7 +78,6 @@ fun HeroSection(
         ), label = "dotPulse"
     )
 
-    // Posisi 14 partikel (seed tetap, gerak berdasarkan particleTime)
     val particleSeeds = remember {
         listOf(
             Triple(0.10f, 0.20f, 0.0f),  // x%, y%, phase offset
@@ -134,7 +97,6 @@ fun HeroSection(
         )
     }
 
-    // Warna aksen partikel
     val particleColors = remember {
         listOf(
             Color(0xFF7C6EFA), Color(0xFFA78BFA), Color(0xFFF472B6),
@@ -148,18 +110,15 @@ fun HeroSection(
     Box(
         modifier = modifier.fillMaxWidth().height(300.dp).clipToBounds()
     ) {
-        // ── Layer 1: Gradient background ──
         Box(modifier = Modifier.fillMaxSize()
             .background(Brush.verticalGradient(
                 listOf(GlassTheme.colors.BgHeroTop, GlassTheme.colors.BgPhone)))
         )
 
-        // ── Layer 2: Particle network (Canvas) ──
         Canvas(modifier = Modifier.fillMaxSize()) {
             val w = size.width
             val h = size.height
 
-            // Hitung posisi aktual tiap partikel (bergerak sinusoidal)
             val positions = particleSeeds.mapIndexed { i, (xSeed, ySeed, phase) ->
                 val t = (particleTime + phase) % 1f
                 val dx = sin(t * 2 * PI.toFloat()) * 30f
@@ -167,7 +126,6 @@ fun HeroSection(
                 Offset(xSeed * w + dx, ySeed * h + dy)
             }
 
-            // Gambar garis koneksi antar partikel yang berdekatan
             for (i in positions.indices) {
                 for (j in i + 1 until positions.size) {
                     val dist = (positions[i] - positions[j]).getDistance()
@@ -184,15 +142,12 @@ fun HeroSection(
                 }
             }
 
-            // Gambar titik partikel
             positions.forEachIndexed { i, pos ->
-                // Glow luar
                 drawCircle(
                     color  = particleColors[i].copy(alpha = 0.15f * dotPulse),
                     radius = 10f,
                     center = pos
                 )
-                // Titik inti
                 drawCircle(
                     color  = particleColors[i].copy(alpha = 0.7f * dotPulse),
                     radius = 3f,
@@ -200,7 +155,6 @@ fun HeroSection(
                 )
             }
 
-            // Grid dots tipis sebagai tekstur
             val gridStep = 36f
             var gx = 0f
             while (gx < w) {
@@ -217,7 +171,6 @@ fun HeroSection(
             }
         }
 
-        // ── Layer 3: Bottom fade ──
         Box(modifier = Modifier.fillMaxWidth().height(120.dp)
             .align(Alignment.BottomCenter)
             .background(Brush.verticalGradient(
@@ -225,7 +178,6 @@ fun HeroSection(
                     GlassTheme.colors.BgPhone.copy(alpha = 0.95f))))
         )
 
-        // ── Back button ──
         Box(modifier = Modifier.padding(18.dp).size(36.dp)
             .align(Alignment.TopStart)
             .clip(CircleShape)
@@ -234,7 +186,7 @@ fun HeroSection(
             .clickable { },
             contentAlignment = Alignment.Center
         ) { Text("‹", fontSize = 20.sp, color = GlassTheme.colors.TextPrimary) }
-        // ── Avatar, Badge + Nama ──
+
         AnimatedVisibility(
             visible = visible,
             enter   = fadeIn(tween(700)) + slideInVertically(tween(700)) { 16 },
@@ -242,12 +194,10 @@ fun HeroSection(
                 .padding(start = 22.dp, end = 22.dp, bottom = 18.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                // ── Avatar circle ──
                 Box(
                     modifier = Modifier.size(100.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    // Gradient ring
                     Canvas(modifier = Modifier.fillMaxSize()) {
                         drawCircle(
                             brush = Brush.sweepGradient(
@@ -264,7 +214,6 @@ fun HeroSection(
                         )
                     }
 
-                    // Lingkaran avatar dengan Foto Profil
                     Image(
                         painter = painterResource(Res.drawable.profil),
                         contentDescription = "Profile Picture",
@@ -274,7 +223,6 @@ fun HeroSection(
                         contentScale = ContentScale.Crop
                     )
 
-                    // Online dot hijau
                     Box(
                         modifier = Modifier
                             .size(16.dp)
@@ -312,8 +260,6 @@ fun HeroSection(
 
 // ╔══════════════════════════════════════════╗
 //  COMPOSABLE 2 — StatsAndActions
-//  Padanan: .stats-row + .profile-subtitle
-//           + .action-row di HTML
 // ╚══════════════════════════════════════════╝
 @Composable
 fun StatsAndActions(
@@ -323,9 +269,6 @@ fun StatsAndActions(
     onEditClick: () -> Unit,         
 ) {
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-        // ... (Stats row code)
-
-        // Stats row — sama seperti sebelumnya
         Row(
             modifier = Modifier.fillMaxWidth().padding(vertical = 18.dp),
             horizontalArrangement = Arrangement.SpaceAround,
@@ -351,12 +294,10 @@ fun StatsAndActions(
             modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp)
         )
 
-        // Action buttons row
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // Tombol Edit Profile
             Button(
                 onClick = onEditClick,
                 modifier = Modifier.weight(1f).height(44.dp),
@@ -377,7 +318,6 @@ fun StatsAndActions(
                 }
             }
 
-            // Tombol Pengaturan (Ganti dari Toggle Dark Mode)
             OutlinedButton(
                 onClick = onSettingsClick,
                 modifier = Modifier.weight(1f).height(44.dp),
@@ -419,8 +359,6 @@ private fun StatItem(value: String, label: String) {
 
 // ╔══════════════════════════════════════════╗
 //  COMPOSABLE 3 — ContactSection
-//  Padanan: 2-col mini cards (Email+Phone)
-//           + full-width Location card
 // ╚══════════════════════════════════════════╝
 @Composable
 fun ContactSection(
@@ -433,14 +371,11 @@ fun ContactSection(
 
         SectionLabel("Informasi Kontak")
 
-        // ── 2-col grid: Email + Phone ──
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // Email card
             GlassCard(modifier = Modifier.weight(1f)) {
-                // Icon box violet
                 GlassIconBox(
                     gradientColors = listOf(
                         Color(0xFF7C6EFA).copy(alpha = 0.35f),
@@ -448,17 +383,14 @@ fun ContactSection(
                     ),
                     blobColor = Color(0xFF7C6EFA).copy(alpha = 0.5f)
                 ) {
-                    // Mail icon shape
                     Canvas(modifier = Modifier.size(22.dp)) {
                         val w = size.width; val h = size.height
-                        // kotak mail
                         drawRoundRect(
                             brush = Brush.linearGradient(
                                 listOf(Color(0xFFA78BFA), Color(0xFF7C6EFA))
                             ),
                             cornerRadius = CornerRadius(6f, 6f)
                         )
-                        // garis V di atas
                         drawLine(
                             Color.White, Offset(0f, h * 0.25f),
                             Offset(w / 2f, h * 0.65f), strokeWidth = 2f
@@ -483,9 +415,7 @@ fun ContactSection(
                 )
             }
 
-            // Phone card
             GlassCard(modifier = Modifier.weight(1f)) {
-                // Icon box teal
                 GlassIconBox(
                     gradientColors = listOf(
                         Color(0xFF2DD4BF).copy(alpha = 0.35f),
@@ -526,7 +456,6 @@ fun ContactSection(
 
         Spacer(Modifier.height(10.dp))
 
-        // ── Location full-width card ──
         GlassCard(modifier = Modifier.fillMaxWidth()) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -540,7 +469,6 @@ fun ContactSection(
                     ),
                     blobColor = Color(0xFFF472B6).copy(alpha = 0.5f)
                 ) {
-                    // Pin location icon
                     Canvas(modifier = Modifier.size(20.dp)) {
                         val cx = size.width / 2f
                         val path = Path().apply {
@@ -591,8 +519,6 @@ fun ContactSection(
 
 // ╔══════════════════════════════════════════╗
 //  COMPOSABLE 4 — BioCard
-//  Padanan: <div class="gcard"> bio
-//           AnimatedVisibility (BONUS +10%)
 // ╚══════════════════════════════════════════╝
 @Composable
 fun BioCard(bio: String, modifier: Modifier = Modifier) {
@@ -607,7 +533,6 @@ fun BioCard(bio: String, modifier: Modifier = Modifier) {
         SectionLabel("Tentang Saya")
 
         GlassCard(modifier = Modifier.fillMaxWidth()) {
-            // Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -617,7 +542,6 @@ fun BioCard(bio: String, modifier: Modifier = Modifier) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    // Person icon box violet→pink
                     GlassIconBox(
                         gradientColors = listOf(
                             Color(0xFF7C6EFA).copy(alpha = 0.30f),
@@ -627,7 +551,6 @@ fun BioCard(bio: String, modifier: Modifier = Modifier) {
                     ) {
                         Canvas(modifier = Modifier.size(18.dp)) {
                             val cx = size.width / 2f
-                            // kepala
                             drawCircle(
                                 brush = Brush.linearGradient(
                                     listOf(Color(0xFFA78BFA), Color(0xFFF472B6))
@@ -635,7 +558,6 @@ fun BioCard(bio: String, modifier: Modifier = Modifier) {
                                 radius = size.width * 0.28f,
                                 center = Offset(cx, size.height * 0.30f)
                             )
-                            // badan
                             val bodyPath = Path().apply {
                                 moveTo(0f, size.height)
                                 cubicTo(
@@ -665,7 +587,6 @@ fun BioCard(bio: String, modifier: Modifier = Modifier) {
                     )
                 }
 
-                // Toggle button
                 Box(
                     modifier = Modifier
                         .size(28.dp)
@@ -684,7 +605,6 @@ fun BioCard(bio: String, modifier: Modifier = Modifier) {
                 }
             }
 
-            // BONUS: AnimatedVisibility expand/collapse
             AnimatedVisibility(
                 visible = expanded,
                 enter = fadeIn(tween(300)) + expandVertically(tween(300)),
@@ -700,7 +620,6 @@ fun BioCard(bio: String, modifier: Modifier = Modifier) {
                         fontWeight = FontWeight.Light
                     )
                     Spacer(Modifier.height(12.dp))
-                    // Skill tags
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         modifier = Modifier.fillMaxWidth()
@@ -716,7 +635,6 @@ fun BioCard(bio: String, modifier: Modifier = Modifier) {
 
 // ╔══════════════════════════════════════════╗
 //  COMPOSABLE 5 — SkillsGrid
-//  Padanan: <div class="skills-grid"> 3-col
 // ╚══════════════════════════════════════════╝
 @Composable
 fun SkillsGrid(modifier: Modifier = Modifier) {
@@ -727,7 +645,6 @@ fun SkillsGrid(modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Kotlin chip
             SkillChip(
                 modifier = Modifier.weight(1f),
                 label = "Kotlin",
@@ -736,7 +653,6 @@ fun SkillsGrid(modifier: Modifier = Modifier) {
                     Color(0xFFF472B6).copy(alpha = 0.20f)
                 )
             ) {
-                // Kotlin K logo shape
                 Canvas(modifier = Modifier.size(22.dp)) {
                     val path = Path().apply {
                         moveTo(0f, 0f)
@@ -755,7 +671,6 @@ fun SkillsGrid(modifier: Modifier = Modifier) {
                 }
             }
 
-            // Compose chip
             SkillChip(
                 modifier = Modifier.weight(1f),
                 label = "Compose",
@@ -765,12 +680,11 @@ fun SkillsGrid(modifier: Modifier = Modifier) {
                 )
             ) {
                 Canvas(modifier = Modifier.size(22.dp)) {
-                    // hexagon
                     val cx = size.width / 2f; val cy = size.height / 2f
                     val r = size.width / 2f
                     val path = Path().apply {
                         for (i in 0..5) {
-                            val angle = ((60.0 * i) - 30.0) * (PI / 180.0) // Rumus manual toRadians
+                            val angle = ((60.0 * i) - 30.0) * (PI / 180.0)
                             val x = (cx + r * cos(angle)).toFloat()
                             val y = (cy + r * sin(angle)).toFloat()
                             if (i == 0) moveTo(x, y) else lineTo(x, y)
@@ -787,7 +701,6 @@ fun SkillsGrid(modifier: Modifier = Modifier) {
                 }
             }
 
-            // ITERA chip
             SkillChip(
                 modifier = Modifier.weight(1f),
                 label = "ITERA",
@@ -797,7 +710,6 @@ fun SkillsGrid(modifier: Modifier = Modifier) {
                 )
             ) {
                 Canvas(modifier = Modifier.size(22.dp)) {
-                    // rumah / gedung kampus
                     val path = Path().apply {
                         moveTo(0f, size.height)
                         lineTo(0f, size.height * 0.45f)
@@ -855,13 +767,8 @@ private fun SkillChip(
     }
 }
 
-// ╔══════════════════════════════════════════╗
-//  COMPOSABLE 6 — BottomNav
-//  Padanan: <div class="bottom-nav"> di HTML
-// ╚══════════════════════════════════════════╝
-
 // ════════════════════════════════════════════
-//  PRIVATE HELPERS — shared building blocks
+//  PRIVATE HELPERS
 // ════════════════════════════════════════════
 
 @Composable
@@ -901,7 +808,6 @@ fun GlassIconBox(
             ),
         contentAlignment = Alignment.Center
     ) {
-        // Blob cahaya di pojok kiri atas (efek glassmorphism icon)
         Box(
             modifier = Modifier
                 .fillMaxSize()

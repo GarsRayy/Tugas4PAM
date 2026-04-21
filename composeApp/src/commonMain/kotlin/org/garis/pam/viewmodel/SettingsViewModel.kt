@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.garis.pam.data.SettingsManager
+import org.garis.pam.data.local.SettingsManager
 
 class SettingsViewModel(private val settingsManager: SettingsManager) : ViewModel() {
 

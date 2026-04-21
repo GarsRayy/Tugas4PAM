@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import org.garis.pam.data.NoteRepository
+import org.garis.pam.data.repository.NoteRepository
 import org.garis.pam.db.NoteEntity
 
 class NoteViewModel(private val repository: NoteRepository) : ViewModel() {

@@ -19,26 +19,21 @@ import androidx.navigation.navArgument
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.graphics.Color
 import org.garis.pam.GlassTheme
-import org.garis.pam.screens.FavoritesScreen
-import org.garis.pam.screens.notes.*
-import org.garis.pam.ui.ProfileScreen
-import org.garis.pam.ui.EditProfileScreen
-import org.garis.pam.viewmodel.NoteViewModel
-import org.garis.pam.viewmodel.ProfileViewModel
-import org.garis.pam.data.NewsRepository
-import org.garis.pam.data.HttpClientFactory
-import org.garis.pam.viewmodel.NewsViewModel
-import org.garis.pam.screens.news.NewsListScreen
-import org.garis.pam.screens.news.NewsDetailScreen
-import org.garis.pam.db.NoteEntity
-import org.garis.pam.data.Article
-
-import org.garis.pam.db.NotesDatabase
-import org.garis.pam.data.NoteRepository
-import org.garis.pam.data.DatabaseDriverFactory
-import org.garis.pam.data.SettingsManager
-import org.garis.pam.viewmodel.SettingsViewModel
-import org.garis.pam.screens.SettingsScreen
+import org.garis.pam.ui.screens.favorites.FavoritesScreen
+import org.garis.pam.ui.screens.notes.*
+import org.garis.pam.ui.screens.profile.ProfileScreen
+import org.garis.pam.ui.screens.profile.EditProfileScreen
+import org.garis.pam.ui.screens.news.NewsListScreen
+import org.garis.pam.ui.screens.news.NewsDetailScreen
+import org.garis.pam.ui.screens.settings.SettingsScreen
+import org.garis.pam.viewmodel.*
+import org.garis.pam.data.local.DatabaseDriverFactory
+import org.garis.pam.data.local.SettingsManager
+import org.garis.pam.data.repository.NoteRepository
+import org.garis.pam.data.repository.NewsRepository
+import org.garis.pam.data.remote.HttpClientFactory
+import org.garis.pam.data.model.Article
+import org.garis.pam.db.*
 
 @Composable
 fun AppNavigation(

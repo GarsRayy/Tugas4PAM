@@ -1,10 +1,9 @@
-package org.garis.pam.screens.notes
+package org.garis.pam.ui.screens.notes
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.*
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
@@ -14,17 +13,25 @@ import androidx.compose.ui.unit.*
 import org.garis.pam.GlassTheme
 import org.garis.pam.db.NoteEntity
 import androidx.compose.ui.draw.clip
+import org.garis.pam.ui.components.MarkdownText
 
 @Composable
 fun NoteDetailScreen(
     note: NoteEntity,
-    onBack: () -> Unit,                // popBackStack()
-    onEditClick: (Long) -> Unit,        // navigate ke EditNote dengan noteId
+    onBack: () -> Unit,
+    onEditClick: (Long) -> Unit,
     onToggleFavorite: (Long) -> Unit,
     onArchiveClick: (Long) -> Unit,
     onDelete: (Long) -> Unit
 ) {
-    val accentColor = GlassTheme.colors.Violet
+    val accentColor = when (note.color_name) {
+        "VIOLET" -> GlassTheme.colors.Violet
+        "TEAL"   -> GlassTheme.colors.Teal
+        "PINK"   -> GlassTheme.colors.Pink
+        "GOLD"   -> GlassTheme.colors.Gold
+        "SKY"    -> GlassTheme.colors.Sky
+        else     -> GlassTheme.colors.Violet
+    }
 
     Column(
         modifier = Modifier
@@ -123,7 +130,7 @@ fun NoteDetailScreen(
                     Text(
                         note.tags,
                         fontSize = 12.sp,
-                        color = GlassTheme.colors.Violet,
+                        color = accentColor,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -140,7 +147,7 @@ fun NoteDetailScreen(
 
             Spacer(Modifier.height(8.dp))
             Text(
-                note.created_at.toString(), // TODO: Format date
+                "Dibuat pada: ${note.created_at}", 
                 fontSize = 12.sp,
                 color = GlassTheme.colors.TextMuted
             )

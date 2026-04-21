@@ -1,8 +1,7 @@
-package org.garis.pam.data
+package org.garis.pam.data.model
 
 import kotlinx.serialization.Serializable
 
-// Wrapper utama untuk response JSON dari NewsAPI
 @Serializable
 data class NewsResponse(
     val status: String,
@@ -10,7 +9,6 @@ data class NewsResponse(
     val articles: List<Article>
 )
 
-// Data class untuk setiap item artikel
 @Serializable
 data class Article(
     val title: String,

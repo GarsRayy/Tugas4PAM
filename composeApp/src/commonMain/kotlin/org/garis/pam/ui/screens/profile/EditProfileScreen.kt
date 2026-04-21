@@ -1,4 +1,4 @@
-package org.garis.pam.ui
+package org.garis.pam.ui.screens.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -9,39 +9,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.garis.pam.GlassTheme
-
-// ── Stateless TextField (state hoisting sesuai materi hal 30) ──
-@Composable
-fun GlassTextField(
-    label: String,
-    value: String,                    // state dari parent/ViewModel
-    onValueChange: (String) -> Unit,  // callback ke ViewModel
-    modifier: Modifier = Modifier,
-    maxLines: Int = 1
-) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text(label, color = GlassTheme.colors.TextMuted, fontSize = 12.sp) },
-        modifier = modifier.fillMaxWidth(),
-        maxLines = maxLines,
-        shape = RoundedCornerShape(14.dp),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor    = GlassTheme.colors.TextPrimary,
-            unfocusedTextColor  = GlassTheme.colors.TextPrimary,
-            focusedBorderColor  = GlassTheme.colors.Violet,
-            unfocusedBorderColor= GlassTheme.colors.GlassBorder,
-            cursorColor         = GlassTheme.colors.Violet,
-            focusedContainerColor   = GlassTheme.colors.GlassBg,
-            unfocusedContainerColor = GlassTheme.colors.GlassBg
-        )
-    )
-}
+import org.garis.pam.ui.components.GlassTextField
 
 // ── Edit Profile Screen ──
 @Composable
