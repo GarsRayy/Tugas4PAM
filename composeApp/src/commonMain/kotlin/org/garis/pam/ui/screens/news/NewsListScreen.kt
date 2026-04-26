@@ -29,6 +29,8 @@ import org.garis.pam.data.model.Article
 import org.garis.pam.viewmodel.NewsUiState
 import org.garis.pam.viewmodel.NewsViewModel
 
+import org.garis.pam.ui.components.LottieLoadingAnimation
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun NewsListScreen(
@@ -54,10 +56,9 @@ fun NewsListScreen(
 
         when (val state = uiState) {
             is NewsUiState.Loading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center),
-                    color = GlassTheme.colors.Violet
-                )
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    LottieLoadingAnimation()
+                }
             }
             is NewsUiState.Success -> {
                 LazyColumn(

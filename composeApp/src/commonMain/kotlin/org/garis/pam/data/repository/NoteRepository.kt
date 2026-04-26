@@ -5,7 +5,7 @@ import app.cash.sqldelight.coroutines.mapToList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
+import kotlin.time.ExperimentalTime
 import org.garis.pam.db.NotesDatabase
 import org.garis.pam.db.NoteEntity
 
@@ -48,21 +48,33 @@ class NoteRepository(database: NotesDatabase) {
             .mapToList(Dispatchers.Default)
     }
 
+    fun getHiddenNotes(): Flow<List<NoteEntity>> {
+        return queries.selectHidden()
+            .asFlow()
+            .mapToList(Dispatchers.Default)
+    }
+
     suspend fun getNoteById(id: Long): NoteEntity? {
         return withContext(Dispatchers.Default) {
             queries.selectById(id).executeAsOneOrNull()
         }
     }
 
+    // Menggunakan kotlin.time.Clock (Kotlin 2.1+) yang lebih stabil untuk compiler K2
+    @OptIn(ExperimentalTime::class)
+    private fun getCurrentTimestamp(): Long {
+        return kotlin.time.Clock.System.now().toEpochMilliseconds()
+    }
+
     suspend fun insertNote(title: String, content: String, tags: String = "", colorName: String = "VIOLET") {
-        val now = Clock.System.now().toEpochMilliseconds()
+        val now = getCurrentTimestamp()
         withContext(Dispatchers.Default) {
-            queries.insert(title, content, 0L, 0L, 0L, tags, colorName, now, now)
+            queries.insert(title, content, 0L, 0L, 0L, 0L, tags, colorName, now, now)
         }
     }
 
     suspend fun updateNote(id: Long, title: String, content: String, tags: String, colorName: String) {
-        val now = Clock.System.now().toEpochMilliseconds()
+        val now = getCurrentTimestamp()
         withContext(Dispatchers.Default) {
             queries.update(title, content, colorName, tags, now, id)
         }
@@ -83,6 +95,12 @@ class NoteRepository(database: NotesDatabase) {
     suspend fun toggleArchive(id: Long) {
         withContext(Dispatchers.Default) {
             queries.toggleArchived(id)
+        }
+    }
+
+    suspend fun toggleHidden(id: Long) {
+        withContext(Dispatchers.Default) {
+            queries.toggleHidden(id)
         }
     }
 

@@ -47,6 +47,13 @@ class NoteViewModel(private val repository: NoteRepository) : ViewModel() {
             initialValue = emptyList()
         )
 
+    val hiddenNotes: StateFlow<List<NoteEntity>> = repository.getHiddenNotes()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
     private val _selectedNote = MutableStateFlow<NoteEntity?>(null)
     val selectedNote: StateFlow<NoteEntity?> = _selectedNote.asStateFlow()
 
@@ -86,6 +93,12 @@ class NoteViewModel(private val repository: NoteRepository) : ViewModel() {
     fun toggleArchive(id: Long) {
         viewModelScope.launch {
             repository.toggleArchive(id)
+        }
+    }
+
+    fun toggleHidden(id: Long) {
+        viewModelScope.launch {
+            repository.toggleHidden(id)
         }
     }
 

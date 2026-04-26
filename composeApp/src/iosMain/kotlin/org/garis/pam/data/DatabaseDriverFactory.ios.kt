@@ -1,4 +1,4 @@
-package org.garis.pam.data
+package org.garis.pam.data.local
 
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.native.NativeSqliteDriver

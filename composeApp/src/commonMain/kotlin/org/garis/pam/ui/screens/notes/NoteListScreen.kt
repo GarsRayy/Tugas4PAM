@@ -26,19 +26,30 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 
+import androidx.compose.animation.*
+import org.garis.pam.platform.NetworkMonitor
+import org.garis.pam.ui.components.NetworkStatusIndicator
+import org.koin.compose.koinInject
+
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun NoteListScreen(
     viewModel: NoteViewModel,
     settingsViewModel: SettingsViewModel,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     onNoteClick: (Long) -> Unit,
     onAddClick: () -> Unit,
     onToggleFavorite: (Long) -> Unit,
     onTogglePin: (Long) -> Unit,
-    onArchiveClick: () -> Unit
+    onArchiveClick: () -> Unit,
+    onHiddenClick: () -> Unit,
+    networkMonitor: NetworkMonitor = koinInject()
 ) {
     val notes by viewModel.notes.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val currentSortOrder by settingsViewModel.currentSortOrder.collectAsState()
+    val isConnected by networkMonitor.isConnected.collectAsState(initial = true)
 
     LaunchedEffect(currentSortOrder) {
         viewModel.updateSortOrder(currentSortOrder)
@@ -54,6 +65,7 @@ fun NoteListScreen(
             )
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
+            NetworkStatusIndicator(isConnected)
             // Header
             Box(
                 modifier = Modifier
@@ -80,17 +92,33 @@ fun NoteListScreen(
                     )
                 }
 
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(GlassTheme.colors.GlassBg)
-                        .border(1.dp, GlassTheme.colors.GlassBorder, CircleShape)
-                        .clickable(onClick = onArchiveClick),
-                    contentAlignment = Alignment.Center
+                Row(
+                    modifier = Modifier.align(Alignment.TopEnd),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("📦", fontSize = 18.sp)
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(GlassTheme.colors.GlassBg)
+                            .border(1.dp, GlassTheme.colors.GlassBorder, CircleShape)
+                            .clickable(onClick = onHiddenClick),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("🔒", fontSize = 18.sp)
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(GlassTheme.colors.GlassBg)
+                            .border(1.dp, GlassTheme.colors.GlassBorder, CircleShape)
+                            .clickable(onClick = onArchiveClick),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("📦", fontSize = 18.sp)
+                    }
                 }
             }
 
@@ -122,12 +150,18 @@ fun NoteListScreen(
                 modifier = Modifier.weight(1f)
             ) {
                 items(notes, key = { it.id }) { note ->
-                    NoteCard(
-                        note = note,
-                        onClick = { onNoteClick(note.id) },
-                        onToggleFavorite = { onToggleFavorite(note.id) },
-                        onTogglePin = { onTogglePin(note.id) }
-                    )
+                    with(sharedTransitionScope) {
+                        NoteCard(
+                            note = note,
+                            modifier = Modifier.sharedElement(
+                                rememberSharedContentState(key = "note-${note.id}"),
+                                animatedVisibilityScope = animatedVisibilityScope
+                            ),
+                            onClick = { onNoteClick(note.id) },
+                            onToggleFavorite = { onToggleFavorite(note.id) },
+                            onTogglePin = { onTogglePin(note.id) }
+                        )
+                    }
                 }
             }
         }

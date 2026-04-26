@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,13 +21,21 @@ import androidx.compose.ui.unit.sp
 import org.garis.pam.GlassTheme
 import org.garis.pam.db.NoteEntity
 
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import kotlinx.datetime.*
+import kotlin.time.ExperimentalTime
+
+@OptIn(ExperimentalTime::class)
 @Composable
 fun NoteCard(
     note: NoteEntity,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
     onToggleFavorite: () -> Unit,
     onTogglePin: () -> Unit
 ) {
+    val haptic = LocalHapticFeedback.current
     val accentColor = when (note.color_name) {
         "VIOLET" -> GlassTheme.colors.Violet
         "TEAL"   -> GlassTheme.colors.Teal
@@ -37,7 +46,7 @@ fun NoteCard(
     }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .border(
@@ -101,8 +110,22 @@ fun NoteCard(
                     }
                     Spacer(Modifier.height(6.dp))
                 }
+                val formattedDate = remember(note.created_at) {
+                    try {
+                        val instant = kotlinx.datetime.Instant.fromEpochMilliseconds(note.created_at)
+                        val dateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+                        val day = dateTime.dayOfMonth.toString().padStart(2, '0')
+                        val month = dateTime.monthNumber.toString().padStart(2, '0')
+                        val year = dateTime.year
+                        val hour = dateTime.hour.toString().padStart(2, '0')
+                        val minute = dateTime.minute.toString().padStart(2, '0')
+                        "$day/$month/$year $hour:$minute"
+                    } catch (e: Exception) {
+                        "Invalid Date"
+                    }
+                }
                 Text(
-                    "Dibuat pada: ${note.created_at}",
+                    "Dibuat pada: $formattedDate",
                     fontSize = 11.sp,
                     color = GlassTheme.colors.TextMuted
                 )
@@ -115,7 +138,10 @@ fun NoteCard(
                         .size(32.dp)
                         .clip(CircleShape)
                         .background(if (note.is_pinned == 1L) GlassTheme.colors.Violet.copy(alpha = 0.2f) else GlassTheme.colors.GlassBg)
-                        .clickable(onClick = onTogglePin),
+                        .clickable { 
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onTogglePin() 
+                        },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -130,7 +156,10 @@ fun NoteCard(
                         .size(36.dp)
                         .clip(CircleShape)
                         .background(GlassTheme.colors.GlassBg)
-                        .clickable(onClick = onToggleFavorite),
+                        .clickable { 
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onToggleFavorite() 
+                        },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(

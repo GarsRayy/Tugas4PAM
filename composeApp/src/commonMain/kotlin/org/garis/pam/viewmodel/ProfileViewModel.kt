@@ -18,7 +18,11 @@ data class ProfileUiState(
     val editBio: String      = myProfile.bio,
     val editEmail: String    = myProfile.email,
     val editPhone: String    = myProfile.phone,
-    val editLocation: String = myProfile.location
+    val editLocation: String = myProfile.location,
+    val editGithub: String   = myProfile.githubUrl,
+    val editLinkedin: String = myProfile.linkedinUrl,
+    val editInstagram: String = myProfile.instagramUrl,
+    val editProfileImage: String? = myProfile.profileImage
 )
 
 // ── ViewModel (sesuai materi hal 24) ──
@@ -44,7 +48,11 @@ class ProfileViewModel : ViewModel() {
                 editBio   = currentState.profile.bio,
                 editEmail = currentState.profile.email,
                 editPhone = currentState.profile.phone,
-                editLocation = currentState.profile.location
+                editLocation = currentState.profile.location,
+                editGithub = currentState.profile.githubUrl,
+                editLinkedin = currentState.profile.linkedinUrl,
+                editInstagram = currentState.profile.instagramUrl,
+                editProfileImage = currentState.profile.profileImage
             )
         }
     }
@@ -69,6 +77,22 @@ class ProfileViewModel : ViewModel() {
         _uiState.update { it.copy(editLocation = newLocation) }
     }
 
+    fun onGithubChange(newUrl: String) {
+        _uiState.update { it.copy(editGithub = newUrl) }
+    }
+
+    fun onLinkedinChange(newUrl: String) {
+        _uiState.update { it.copy(editLinkedin = newUrl) }
+    }
+
+    fun onInstagramChange(newUrl: String) {
+        _uiState.update { it.copy(editInstagram = newUrl) }
+    }
+
+    fun onProfileImageChange(newImage: String?) {
+        _uiState.update { it.copy(editProfileImage = newImage) }
+    }
+
     // ── Event: simpan perubahan ──
     fun saveProfile() {
         _uiState.update { currentState ->
@@ -78,7 +102,11 @@ class ProfileViewModel : ViewModel() {
                     bio  = currentState.editBio.ifBlank  { currentState.profile.bio },
                     email = currentState.editEmail.ifBlank { currentState.profile.email },
                     phone = currentState.editPhone.ifBlank { currentState.profile.phone },
-                    location = currentState.editLocation.ifBlank { currentState.profile.location }
+                    location = currentState.editLocation.ifBlank { currentState.profile.location },
+                    githubUrl = currentState.editGithub,
+                    linkedinUrl = currentState.editLinkedin,
+                    instagramUrl = currentState.editInstagram,
+                    profileImage = currentState.editProfileImage
                 ),
                 isEditing = false
             )

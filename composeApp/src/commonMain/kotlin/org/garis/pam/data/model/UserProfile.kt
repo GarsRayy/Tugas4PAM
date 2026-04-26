@@ -8,7 +8,11 @@ data class UserProfile(
     val bio: String,
     val email: String,
     val phone: String,
-    val location: String
+    val location: String,
+    val profileImage: String? = null, // Path atau URL atau identifier avatar
+    val githubUrl: String = "",
+    val linkedinUrl: String = "",
+    val instagramUrl: String = ""
 )
 
 val myProfile = UserProfile(
@@ -21,5 +25,8 @@ val myProfile = UserProfile(
             "aplikasi lintas platform menggunakan Kotlin dan Compose Multiplatform.",
     email    = "garisrayya@gmail.com",
     phone    = "0895423021051",
-    location = "Bandar Lampung, Lampung"
+    location = "Bandar Lampung, Lampung",
+    githubUrl = "https://github.com/garisrayya",
+    linkedinUrl = "https://linkedin.com/in/garisrayya",
+    instagramUrl = "https://instagram.com/garisrayya"
 )
