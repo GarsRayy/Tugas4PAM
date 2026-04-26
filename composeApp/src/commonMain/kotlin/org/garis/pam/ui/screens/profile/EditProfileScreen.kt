@@ -23,11 +23,17 @@ fun EditProfileScreen(
     editEmail: String,
     editPhone: String,
     editLocation: String,
-    onNameChange: (String) -> Unit,   // state hoisting ke ViewModel
-    onBioChange: (String) -> Unit,    // state hoisting ke ViewModel
+    editGithub: String,
+    editLinkedin: String,
+    editInstagram: String,
+    onNameChange: (String) -> Unit,
+    onBioChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
     onPhoneChange: (String) -> Unit,
     onLocationChange: (String) -> Unit,
+    onGithubChange: (String) -> Unit,
+    onLinkedinChange: (String) -> Unit,
+    onInstagramChange: (String) -> Unit,
     onSave: () -> Unit,
     onCancel: () -> Unit
 ) {
@@ -91,6 +97,32 @@ fun EditProfileScreen(
             label = "Lokasi",
             value = editLocation,
             onValueChange = onLocationChange
+        )
+
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "Tautan Media Sosial",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = GlassTheme.colors.TextPrimary
+        )
+
+        GlassTextField(
+            label = "URL GitHub",
+            value = editGithub,
+            onValueChange = onGithubChange
+        )
+
+        GlassTextField(
+            label = "URL LinkedIn",
+            value = editLinkedin,
+            onValueChange = onLinkedinChange
+        )
+
+        GlassTextField(
+            label = "URL Instagram",
+            value = editInstagram,
+            onValueChange = onInstagramChange
         )
 
         Spacer(Modifier.height(8.dp))

@@ -14,6 +14,13 @@ kotlin {
     jvmToolchain(11)
     androidTarget()
     
+    sourceSets.all {
+        languageSettings {
+            languageVersion = "2.1"
+            apiVersion = "2.1"
+        }
+    }
+
     listOf(
         iosArm64(),
         iosSimulatorArm64()
@@ -32,6 +39,7 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.sqldelight.android.driver)
+            implementation(libs.koin.android)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -56,6 +64,13 @@ kotlin {
             implementation(libs.multiplatform.settings.no.arg)
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor)
+            implementation(libs.compottie)
+            implementation(libs.compottie.resources)
+            
+            // Koin
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

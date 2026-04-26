@@ -1,5 +1,6 @@
 package org.garis.pam.ui.screens.favorites
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,9 +15,14 @@ import org.garis.pam.GlassTheme
 import org.garis.pam.db.NoteEntity
 import org.garis.pam.ui.screens.notes.NoteCard
 
+import org.garis.pam.ui.components.LottieEmptyAnimation
+
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun FavoritesScreen(
     favorites: List<NoteEntity>,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     onNoteClick: (Long) -> Unit,
     onToggleFavorite: (Long) -> Unit,
     onTogglePin: (Long) -> Unit
@@ -57,7 +63,7 @@ fun FavoritesScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("🤍", fontSize = 48.sp)
+                    LottieEmptyAnimation(modifier = Modifier.size(240.dp))
                     Spacer(Modifier.height(16.dp))
                     Text(
                         "Belum ada catatan favorit",
@@ -81,12 +87,18 @@ fun FavoritesScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(favorites, key = { it.id }) { note ->
-                    NoteCard(
-                        note = note,
-                        onClick = { onNoteClick(note.id) },
-                        onToggleFavorite = { onToggleFavorite(note.id) },
-                        onTogglePin = { onTogglePin(note.id) }
-                    )
+                    with(sharedTransitionScope) {
+                        NoteCard(
+                            note = note,
+                            modifier = Modifier.sharedElement(
+                                rememberSharedContentState(key = "note-${note.id}"),
+                                animatedVisibilityScope = animatedVisibilityScope
+                            ),
+                            onClick = { onNoteClick(note.id) },
+                            onToggleFavorite = { onToggleFavorite(note.id) },
+                            onTogglePin = { onTogglePin(note.id) }
+                        )
+                    }
                 }
             }
         }

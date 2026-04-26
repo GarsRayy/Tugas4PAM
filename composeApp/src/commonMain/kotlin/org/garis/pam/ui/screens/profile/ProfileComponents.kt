@@ -53,6 +53,8 @@ import kotlin.math.cos
 fun HeroSection(
     name: String,
     badge: String,
+    profileImage: String? = null,
+    onImageClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var visible by remember { mutableStateOf(false) }
@@ -195,7 +197,9 @@ fun HeroSection(
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Box(
-                    modifier = Modifier.size(100.dp),
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clickable { onImageClick() },
                     contentAlignment = Alignment.Center
                 ) {
                     Canvas(modifier = Modifier.fillMaxSize()) {
@@ -214,14 +218,30 @@ fun HeroSection(
                         )
                     }
 
-                    Image(
-                        painter = painterResource(Res.drawable.profil),
-                        contentDescription = "Profile Picture",
-                        modifier = Modifier
-                            .size(84.dp)
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
+                    if (profileImage == null) {
+                        Image(
+                            painter = painterResource(Res.drawable.profil),
+                            contentDescription = "Profile Picture",
+                            modifier = Modifier
+                                .size(84.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .size(84.dp)
+                                .clip(CircleShape)
+                                .background(GlassTheme.colors.Violet),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = profileImage,
+                                fontSize = 40.sp,
+                                color = Color.White
+                            )
+                        }
+                    }
 
                     Box(
                         modifier = Modifier
@@ -264,9 +284,11 @@ fun HeroSection(
 @Composable
 fun StatsAndActions(
     subtitle: String,
-    isDarkMode: Boolean,
+    totalNotes: Int = 0,
+    totalFavorites: Int = 0,
+    totalNewsRead: Int = 0,
     onSettingsClick: () -> Unit,
-    onEditClick: () -> Unit,         
+    onEditClick: () -> Unit,
 ) {
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
         Row(
@@ -274,15 +296,15 @@ fun StatsAndActions(
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            StatItem("Smtr 6", "Semester")
+            StatItem("$totalNotes", "Catatan")
             Box(modifier = Modifier.width(1.dp).height(36.dp)
                 .background(Brush.verticalGradient(
                     listOf(Color.Transparent, GlassTheme.colors.GlassBorder, Color.Transparent))))
-            StatItem("KMP", "Spesialisasi")
+            StatItem("$totalFavorites", "Favorit")
             Box(modifier = Modifier.width(1.dp).height(36.dp)
                 .background(Brush.verticalGradient(
                     listOf(Color.Transparent, GlassTheme.colors.GlassBorder, Color.Transparent))))
-            StatItem("ITERA", "Kampus")
+            StatItem("$totalNewsRead", "Berita")
         }
 
         Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(GlassTheme.colors.GlassBorder2))
@@ -866,23 +888,121 @@ private fun SectionLabel(text: String) {
 }
 
 @Composable
-fun AnimatedButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    content: @Composable BoxScope.() -> Unit
+fun SocialSection(
+    githubUrl: String,
+    linkedinUrl: String,
+    instagramUrl: String,
+    onUrlClick: (String) -> Unit
 ) {
-    var pressed by remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(
-        targetValue = if (pressed) 0.94f else 1f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "btnScale"
-    )
+    Column(modifier = Modifier.padding(horizontal = 18.dp)) {
+        SectionLabel("Tautan Media Sosial")
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            SocialIconCard(
+                label = "GitHub",
+                icon = "GitHub",
+                color = Color(0xFF333333),
+                modifier = Modifier.weight(1f),
+                onClick = { onUrlClick(githubUrl) }
+            )
+            SocialIconCard(
+                label = "LinkedIn",
+                icon = "LinkedIn",
+                color = Color(0xFF0077B5),
+                modifier = Modifier.weight(1f),
+                onClick = { onUrlClick(linkedinUrl) }
+            )
+            SocialIconCard(
+                label = "Instagram",
+                icon = "Instagram",
+                color = Color(0xFFE4405F),
+                modifier = Modifier.weight(1f),
+                onClick = { onUrlClick(instagramUrl) }
+            )
+        }
+        Spacer(Modifier.height(16.dp))
+    }
+}
+
+@Composable
+fun SocialIconCard(
+    label: String,
+    icon: String,
+    color: Color,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
     Box(
         modifier = modifier
-            .graphicsLayer { scaleX = scale; scaleY = scale }
-            .clickable {
-                onClick()
-            },
-        content = content
+            .clip(RoundedCornerShape(16.dp))
+            .border(1.dp, GlassTheme.colors.GlassBorder, RoundedCornerShape(16.dp))
+            .background(GlassTheme.colors.GlassBg)
+            .clickable { onClick() }
+            .padding(12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(color.copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = icon.take(1),
+                    color = color,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+            }
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = label,
+                fontSize = 10.sp,
+                color = GlassTheme.colors.TextSecond,
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+}
+
+@Composable
+fun AvatarSelectionDialog(
+    onDismiss: () -> Unit,
+    onAvatarSelected: (String) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Pilih Avatar Default", color = GlassTheme.colors.TextPrimary) },
+        text = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                val avatars = listOf("🦊", "🦁", "🤖", "🚀", "🐱", "🐶")
+                avatars.forEach { avatar ->
+                    Text(
+                        text = avatar,
+                        fontSize = 32.sp,
+                        modifier = Modifier
+                            .clickable {
+                                onAvatarSelected(avatar)
+                                onDismiss()
+                            }
+                            .padding(8.dp)
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Batal", color = GlassTheme.colors.Violet)
+            }
+        },
+        containerColor = GlassTheme.colors.BgPhone,
+        shape = RoundedCornerShape(24.dp)
     )
 }

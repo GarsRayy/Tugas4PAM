@@ -1,5 +1,6 @@
 package org.garis.pam.ui.screens.notes
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,9 +16,12 @@ import org.garis.pam.GlassTheme
 import org.garis.pam.viewmodel.NoteViewModel
 import androidx.compose.ui.draw.clip
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun ArchiveScreen(
     viewModel: NoteViewModel,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     onNoteClick: (Long) -> Unit,
     onBack: () -> Unit
 ) {
@@ -80,12 +84,18 @@ fun ArchiveScreen(
                     modifier = Modifier.weight(1f)
                 ) {
                     items(archivedNotes, key = { it.id }) { note ->
-                        NoteCard(
-                            note = note,
-                            onClick = { onNoteClick(note.id) },
-                            onToggleFavorite = { viewModel.toggleFavorite(note.id) },
-                            onTogglePin = { viewModel.togglePin(note.id) }
-                        )
+                        with(sharedTransitionScope) {
+                            NoteCard(
+                                note = note,
+                                modifier = Modifier.sharedElement(
+                                    rememberSharedContentState(key = "note-${note.id}"),
+                                    animatedVisibilityScope = animatedVisibilityScope
+                                ),
+                                onClick = { onNoteClick(note.id) },
+                                onToggleFavorite = { viewModel.toggleFavorite(note.id) },
+                                onTogglePin = { viewModel.togglePin(note.id) }
+                            )
+                        }
                     }
                 }
             }

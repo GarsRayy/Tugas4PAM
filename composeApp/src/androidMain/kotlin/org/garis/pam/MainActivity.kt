@@ -8,13 +8,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import org.garis.pam.data.local.DatabaseDriverFactory
 
+import org.koin.compose.koinInject
+
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         setContent {
-            App(databaseDriverFactory = DatabaseDriverFactory(this))
+            App(databaseDriverFactory = koinInject())
         }
     }
 }

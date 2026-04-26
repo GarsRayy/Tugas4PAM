@@ -1,5 +1,7 @@
 package org.garis.pam.navigation
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -34,7 +36,9 @@ import org.garis.pam.data.repository.NewsRepository
 import org.garis.pam.data.remote.HttpClientFactory
 import org.garis.pam.data.model.Article
 import org.garis.pam.db.*
+import org.koin.compose.viewmodel.koinViewModel
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun AppNavigation(
     profileViewModel: ProfileViewModel,
@@ -44,198 +48,238 @@ fun AppNavigation(
 ) {
     val navController = rememberNavController()
     
-    // 1. Inisialisasi Database SQLite
-    val notesDatabase = remember { NotesDatabase(databaseDriverFactory.createDriver()) }
-    
-    // 2. Inisialisasi Repository
-    val noteRepository = remember { NoteRepository(notesDatabase) }
-    val settingsManager = remember { SettingsManager() }
-    
-    // 3. Inisialisasi ViewModel
-    val noteViewModel: NoteViewModel = viewModel { NoteViewModel(noteRepository) }
-    val settingsViewModel: SettingsViewModel = viewModel { SettingsViewModel(settingsManager) }
+    val noteViewModel: NoteViewModel = koinViewModel()
+    val settingsViewModel: SettingsViewModel = koinViewModel()
+    val newsViewModel: NewsViewModel = koinViewModel()
 
     val favoriteNotes by noteViewModel.favoriteNotes.collectAsState()
     val selectedNote by noteViewModel.selectedNote.collectAsState()
     val profileUiState by profileViewModel.uiState.collectAsState()
-    val newsRepository = remember { NewsRepository(HttpClientFactory.create()) }
-    val newsViewModel: NewsViewModel = viewModel { NewsViewModel(newsRepository) }
 
-    Scaffold(
-        bottomBar = {
-            val currentRoute = navController
-                .currentBackStackEntryAsState().value?.destination?.route
-            val showBottomNav = currentRoute in listOf(
-                Screen.Notes.route,
-                Screen.Favorites.route,
-                Screen.Profile.route,
-                Screen.News.route
-            )
-            if (showBottomNav) {
-                GlassBottomNav(navController = navController)
-            }
-        },
-        containerColor = GlassTheme.colors.BgPage
-    ) { paddingValues ->
-
-        NavHost(
-            navController = navController,
-            startDestination = Screen.Notes.route,
-            modifier = Modifier.padding(paddingValues)
-        ) {
-
-            // ── TAB: Notes ──
-            composable(Screen.Notes.route) {
-                NoteListScreen(
-                    viewModel        = noteViewModel,
-                    settingsViewModel = settingsViewModel,
-                    onNoteClick      = { noteId: Long ->
-                        noteViewModel.selectNote(noteId)
-                        navController.navigate(Screen.NoteDetail.createRoute(noteId))
-                    },
-                    onAddClick       = { 
-                        noteViewModel.clearSelectedNote()
-                        navController.navigate(Screen.AddNote.route) 
-                    },
-                    onToggleFavorite = { noteId: Long ->
-                        noteViewModel.toggleFavorite(noteId)
-                    },
-                    onTogglePin = { noteId: Long ->
-                        noteViewModel.togglePin(noteId)
-                    },
-                    onArchiveClick = {
-                        navController.navigate(Screen.Archive.route)
-                    }
+    SharedTransitionLayout {
+        Scaffold(
+            bottomBar = {
+                val currentRoute = navController
+                    .currentBackStackEntryAsState().value?.destination?.route
+                val showBottomNav = currentRoute in listOf(
+                    Screen.Notes.route,
+                    Screen.Favorites.route,
+                    Screen.Profile.route,
+                    Screen.News.route
                 )
-            }
-
-            // ── TAB: Favorites ──
-            composable(Screen.Favorites.route) {
-                FavoritesScreen(
-                    favorites        = favoriteNotes,
-                    onNoteClick      = { noteId: Long ->
-                        noteViewModel.selectNote(noteId)
-                        navController.navigate(Screen.NoteDetail.createRoute(noteId))
-                    },
-                    onToggleFavorite = { noteId: Long ->
-                        noteViewModel.toggleFavorite(noteId)
-                    },
-                    onTogglePin = { noteId: Long ->
-                        noteViewModel.togglePin(noteId)
-                    }
-                )
-            }
-
-            // ── TAB: News ──
-            composable(Screen.News.route) {
-                NewsListScreen(
-                    viewModel = newsViewModel,
-                    onNavigateToDetail = { article: Article ->
-                        newsViewModel.selectArticle(article)
-                        navController.navigate(Screen.NewsDetail.route)
-                    }
-                )
-            }
-
-            // ── TAB: Profile ──
-            composable(Screen.Profile.route) {
-                ProfileScreen(
-                    profile      = profileUiState.profile,
-                    isDarkMode   = isDarkMode,
-                    onEditClick  = {
-                        navController.navigate("edit_profile")
-                    },
-                    settingsViewModel = settingsViewModel
-                )
-            }
-
-            // ── News Detail ──
-            composable(Screen.NewsDetail.route) {
-                val article by newsViewModel.selectedArticle.collectAsState()
-                article?.let {
-                    NewsDetailScreen(
-                        article = it,
-                        onNavigateBack = { navController.popBackStack() }
-                    )
+                if (showBottomNav) {
+                    GlassBottomNav(navController = navController)
                 }
-            }
+            },
+            containerColor = GlassTheme.colors.BgPage
+        ) { paddingValues ->
 
-            // ── Note Detail (dengan argument noteId) ──
-            composable(
-                route = Screen.NoteDetail.route,
-                arguments = listOf(
-                    navArgument("noteId") { type = NavType.LongType }
-                )
+            NavHost(
+                navController = navController,
+                startDestination = Screen.Notes.route,
+                modifier = Modifier.padding(paddingValues)
             ) {
-                selectedNote?.let {
-                    NoteDetailScreen(
-                        note             = it,
-                        onBack           = { navController.popBackStack() },
-                        onEditClick      = { id ->
-                            navController.navigate(Screen.EditNote.createRoute(id))
+
+                // ── TAB: Notes ──
+                composable(Screen.Notes.route) {
+                    NoteListScreen(
+                        viewModel        = noteViewModel,
+                        settingsViewModel = settingsViewModel,
+                        sharedTransitionScope = this@SharedTransitionLayout,
+                        animatedVisibilityScope = this@composable,
+                        onNoteClick      = { noteId: Long ->
+                            noteViewModel.selectNote(noteId)
+                            navController.navigate(Screen.NoteDetail.createRoute(noteId))
                         },
-                        onToggleFavorite = { id -> noteViewModel.toggleFavorite(id) },
-                        onArchiveClick   = { id -> noteViewModel.toggleArchive(id) },
-                        onDelete         = { id ->
-                            noteViewModel.deleteNote(id)
-                            navController.popBackStack()
+                        onAddClick       = { 
+                            noteViewModel.clearSelectedNote()
+                            navController.navigate(Screen.AddNote.route) 
+                        },
+                        onToggleFavorite = { noteId: Long ->
+                            noteViewModel.toggleFavorite(noteId)
+                        },
+                        onTogglePin = { noteId: Long ->
+                            noteViewModel.togglePin(noteId)
+                        },
+                        onArchiveClick = {
+                            navController.navigate(Screen.Archive.route)
+                        },
+                        onHiddenClick = {
+                            navController.navigate(Screen.HiddenNotes.route)
                         }
                     )
                 }
-            }
 
-            // ── Archive ──
-            composable(Screen.Archive.route) {
-                ArchiveScreen(
-                    viewModel = noteViewModel,
-                    onNoteClick = { noteId ->
-                        noteViewModel.selectNote(noteId)
-                        navController.navigate(Screen.NoteDetail.createRoute(noteId))
-                    },
-                    onBack = { navController.popBackStack() }
-                )
-            }
+                // ── TAB: Favorites ──
+                composable(Screen.Favorites.route) {
+                    FavoritesScreen(
+                        favorites        = favoriteNotes,
+                        sharedTransitionScope = this@SharedTransitionLayout,
+                        animatedVisibilityScope = this@composable,
+                        onNoteClick      = { noteId: Long ->
+                            noteViewModel.selectNote(noteId)
+                            navController.navigate(Screen.NoteDetail.createRoute(noteId))
+                        },
+                        onToggleFavorite = { noteId: Long ->
+                            noteViewModel.toggleFavorite(noteId)
+                        },
+                        onTogglePin = { noteId: Long ->
+                            noteViewModel.togglePin(noteId)
+                        }
+                    )
+                }
 
-            // ── Add Note ──
-            composable(Screen.AddNote.route) {
-                AddEditNoteScreen(
-                    viewModel = noteViewModel,
-                    onBack = { navController.popBackStack() }
-                )
-            }
+                // ── TAB: News ──
+                composable(Screen.News.route) {
+                    NewsListScreen(
+                        viewModel = newsViewModel,
+                        onNavigateToDetail = { article: Article ->
+                            newsViewModel.selectArticle(article)
+                            navController.navigate(Screen.NewsDetail.route)
+                        }
+                    )
+                }
 
-            // ── Edit Note (dengan argument noteId) ──
-            composable(
-                route = Screen.EditNote.route,
-                arguments = listOf(
-                    navArgument("noteId") { type = NavType.LongType }
-                )
-            ) {
-                AddEditNoteScreen(
-                    viewModel = noteViewModel,
-                    onBack = { navController.popBackStack() }
-                )
-            }
+                // ── TAB: Profile ──
+                composable(Screen.Profile.route) {
+                    ProfileScreen(
+                        profile      = profileUiState.profile,
+                        isDarkMode   = isDarkMode,
+                        onEditClick  = {
+                            profileViewModel.startEditing()
+                            navController.navigate("edit_profile")
+                        },
+                        onProfileImageChange = profileViewModel::onProfileImageChange,
+                        onSettingsClick = {
+                            navController.navigate(Screen.Settings.route)
+                        },
+                        noteViewModel = noteViewModel,
+                        newsViewModel = newsViewModel
+                    )
+                }
 
-            // ── Edit Profile ──
-            composable("edit_profile") {
-                EditProfileScreen(
-                    editName     = profileUiState.editName,
-                    editBio      = profileUiState.editBio,
-                    editEmail    = profileUiState.editEmail,
-                    editPhone    = profileUiState.editPhone,
-                    editLocation = profileUiState.editLocation,
-                    onNameChange = profileViewModel::onNameChange,
-                    onBioChange  = profileViewModel::onBioChange,
-                    onEmailChange = profileViewModel::onEmailChange,
-                    onPhoneChange = profileViewModel::onPhoneChange,
-                    onLocationChange = profileViewModel::onLocationChange,
-                    onSave       = {
-                        profileViewModel.saveProfile()
-                        navController.popBackStack()
-                    },
-                    onCancel = { navController.popBackStack() }
-                )
+                // ── Settings ──
+                composable(Screen.Settings.route) {
+                    SettingsScreen(
+                        viewModel = settingsViewModel,
+                        onBackClick = { navController.popBackStack() }
+                    )
+                }
+
+                // ── News Detail ──
+                composable(Screen.NewsDetail.route) {
+                    val article by newsViewModel.selectedArticle.collectAsState()
+                    article?.let {
+                        NewsDetailScreen(
+                            article = it,
+                            onNavigateBack = { navController.popBackStack() }
+                        )
+                    }
+                }
+
+                // ── Note Detail (dengan argument noteId) ──
+                composable(
+                    route = Screen.NoteDetail.route,
+                    arguments = listOf(
+                        navArgument("noteId") { type = NavType.LongType }
+                    )
+                ) {
+                    selectedNote?.let {
+                        NoteDetailScreen(
+                            note             = it,
+                            sharedTransitionScope = this@SharedTransitionLayout,
+                            animatedVisibilityScope = this@composable,
+                            onBack           = { navController.popBackStack() },
+                            onEditClick      = { id ->
+                                navController.navigate(Screen.EditNote.createRoute(id))
+                            },
+                            onToggleFavorite = { id -> noteViewModel.toggleFavorite(id) },
+                            onArchiveClick   = { id -> noteViewModel.toggleArchive(id) },
+                            onHiddenClick    = { id -> noteViewModel.toggleHidden(id) },
+                            onDelete         = { id ->
+                                noteViewModel.deleteNote(id)
+                                navController.popBackStack()
+                            }
+                        )
+                    }
+                }
+
+                // ── Archive ──
+                composable(Screen.Archive.route) {
+                    ArchiveScreen(
+                        viewModel = noteViewModel,
+                        sharedTransitionScope = this@SharedTransitionLayout,
+                        animatedVisibilityScope = this@composable,
+                        onNoteClick = { noteId ->
+                            noteViewModel.selectNote(noteId)
+                            navController.navigate(Screen.NoteDetail.createRoute(noteId))
+                        },
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+
+                // ── Hidden Notes ──
+                composable(Screen.HiddenNotes.route) {
+                    HiddenNotesScreen(
+                        viewModel = noteViewModel,
+                        settingsViewModel = settingsViewModel,
+                        sharedTransitionScope = this@SharedTransitionLayout,
+                        animatedVisibilityScope = this@composable,
+                        onNoteClick = { noteId ->
+                            noteViewModel.selectNote(noteId)
+                            navController.navigate(Screen.NoteDetail.createRoute(noteId))
+                        },
+                        onBackClick = { navController.popBackStack() }
+                    )
+                }
+
+                // ── Add Note ──
+                composable(Screen.AddNote.route) {
+                    AddEditNoteScreen(
+                        viewModel = noteViewModel,
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+
+                // ── Edit Note (dengan argument noteId) ──
+                composable(
+                    route = Screen.EditNote.route,
+                    arguments = listOf(
+                        navArgument("noteId") { type = NavType.LongType }
+                    )
+                ) {
+                    AddEditNoteScreen(
+                        viewModel = noteViewModel,
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+
+                // ── Edit Profile ──
+                composable("edit_profile") {
+                    EditProfileScreen(
+                        editName     = profileUiState.editName,
+                        editBio      = profileUiState.editBio,
+                        editEmail    = profileUiState.editEmail,
+                        editPhone    = profileUiState.editPhone,
+                        editLocation = profileUiState.editLocation,
+                        editGithub   = profileUiState.editGithub,
+                        editLinkedin = profileUiState.editLinkedin,
+                        editInstagram = profileUiState.editInstagram,
+                        onNameChange = profileViewModel::onNameChange,
+                        onBioChange  = profileViewModel::onBioChange,
+                        onEmailChange = profileViewModel::onEmailChange,
+                        onPhoneChange = profileViewModel::onPhoneChange,
+                        onLocationChange = profileViewModel::onLocationChange,
+                        onGithubChange = profileViewModel::onGithubChange,
+                        onLinkedinChange = profileViewModel::onLinkedinChange,
+                        onInstagramChange = profileViewModel::onInstagramChange,
+                        onSave       = {
+                            profileViewModel.saveProfile()
+                            navController.popBackStack()
+                        },
+                        onCancel = { navController.popBackStack() }
+                    )
+                }
             }
         }
     }

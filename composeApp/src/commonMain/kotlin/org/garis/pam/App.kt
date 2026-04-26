@@ -8,15 +8,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import org.garis.pam.data.local.DatabaseDriverFactory
 import org.garis.pam.data.local.SettingsManager
 import org.garis.pam.navigation.AppNavigation
+import org.koin.compose.koinInject
 import org.garis.pam.viewmodel.NoteViewModel
 import org.garis.pam.viewmodel.ProfileViewModel
 import org.garis.pam.viewmodel.SettingsViewModel
 
 @Composable
 fun App(databaseDriverFactory: DatabaseDriverFactory) {
-    val profileViewModel: ProfileViewModel = viewModel { ProfileViewModel() }
-    val settingsManager = remember { SettingsManager() }
-    val settingsViewModel: SettingsViewModel = viewModel { SettingsViewModel(settingsManager) }
+    val profileViewModel: ProfileViewModel = koinInject()
+    val settingsViewModel: SettingsViewModel = koinInject()
 
     val profileUiState by profileViewModel.uiState.collectAsState()
     val currentTheme by settingsViewModel.currentTheme.collectAsState()

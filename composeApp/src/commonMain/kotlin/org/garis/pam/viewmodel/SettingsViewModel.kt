@@ -25,6 +25,20 @@ class SettingsViewModel(private val settingsManager: SettingsManager) : ViewMode
             initialValue = "newest"
         )
 
+    val isBiometricEnabled: StateFlow<Boolean> = settingsManager.biometricEnabledFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
+
+    val hiddenPassword: StateFlow<String> = settingsManager.hiddenPasswordFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = ""
+        )
+
     fun changeTheme(theme: String) {
         viewModelScope.launch {
             settingsManager.setTheme(theme)
@@ -34,6 +48,18 @@ class SettingsViewModel(private val settingsManager: SettingsManager) : ViewMode
     fun changeSortOrder(order: String) {
         viewModelScope.launch {
             settingsManager.setSortOrder(order)
+        }
+    }
+
+    fun setBiometricEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsManager.setBiometricEnabled(enabled)
+        }
+    }
+
+    fun setHiddenPassword(password: String) {
+        viewModelScope.launch {
+            settingsManager.setHiddenPassword(password)
         }
     }
 }
