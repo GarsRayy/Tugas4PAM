@@ -32,11 +32,14 @@ class AiRepository(private val geminiService: GeminiService) {
         
         when (result) {
             is NetworkResult.Success -> {
-                val summary = result.data.candidates.firstOrNull()?.content?.parts?.firstOrNull()?.text
+                val response = result.data
+                val summary = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
+                
                 if (summary != null) {
                     NetworkResult.Success(summary)
                 } else {
-                    NetworkResult.Error(message = "Gemini returned empty summary")
+                    val apiError = response.error?.message ?: "Unknown API error"
+                    NetworkResult.Error(message = "Gemini Error: $apiError")
                 }
             }
             is NetworkResult.Error -> result
@@ -73,11 +76,13 @@ class AiRepository(private val geminiService: GeminiService) {
         
         when (result) {
             is NetworkResult.Success -> {
-                val markdown = result.data.candidates.firstOrNull()?.content?.parts?.firstOrNull()?.text
+                val response = result.data
+                val markdown = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
                 if (markdown != null) {
                     NetworkResult.Success(markdown)
                 } else {
-                    NetworkResult.Error(message = "Gemini failed to analyze image")
+                    val apiError = response.error?.message ?: "Unknown API error"
+                    NetworkResult.Error(message = "Gemini Error: $apiError")
                 }
             }
             is NetworkResult.Error -> result
@@ -137,7 +142,8 @@ class AiRepository(private val geminiService: GeminiService) {
         
         when (result) {
             is NetworkResult.Success -> {
-                val jsonText = result.data.candidates.firstOrNull()?.content?.parts?.firstOrNull()?.text
+                val response = result.data
+                val jsonText = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
                 if (jsonText != null) {
                     try {
                         // Bersihkan JSON dari markdown formatting jika ada (```json ... ```)
@@ -152,7 +158,8 @@ class AiRepository(private val geminiService: GeminiService) {
                         NetworkResult.Error(message = "Format AI tidak valid: ${e.message}")
                     }
                 } else {
-                    NetworkResult.Error(message = "Gemini memberikan respon kosong")
+                    val apiError = response.error?.message ?: "Gemini memberikan respon kosong"
+                    NetworkResult.Error(message = "Gemini Error: $apiError")
                 }
             }
             is NetworkResult.Error -> result

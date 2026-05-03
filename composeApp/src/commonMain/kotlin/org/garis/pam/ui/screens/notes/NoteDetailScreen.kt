@@ -159,18 +159,56 @@ fun NoteDetailScreen(
                     Spacer(Modifier.height(32.dp))
 
                     // AI Generative UI Section ✨
-                    if (insightState is NetworkResult.Success) {
-                        AiInsightCard(
-                            insight = insightState.data,
-                            onActionClick = { action ->
-                                viewModel.performAction(action)
-                            },
-                            onApplyTheme = { theme ->
-                                val themeString = "ai_theme|${theme.primaryHex}|${theme.secondaryHex}|${theme.accentHex}|${theme.backgroundHex}|${theme.name}"
-                                onThemeChange(themeString)
+                    when (insightState) {
+                        is NetworkResult.Loading -> {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(24.dp))
+                                    .background(GlassTheme.colors.Teal.copy(alpha = 0.05f))
+                                    .border(1.dp, GlassTheme.colors.Teal.copy(alpha = 0.2f), RoundedCornerShape(24.dp))
+                                    .padding(20.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    CircularProgressIndicator(modifier = Modifier.size(16.dp), color = GlassTheme.colors.Teal, strokeWidth = 2.dp)
+                                    Spacer(Modifier.width(12.dp))
+                                    Text("Sedang mengambil insight...", fontSize = 14.sp, color = GlassTheme.colors.TextSecond)
+                                }
                             }
-                        )
-                        Spacer(Modifier.height(24.dp))
+                            Spacer(Modifier.height(24.dp))
+                        }
+                        is NetworkResult.Error -> {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(24.dp))
+                                    .background(GlassTheme.colors.Pink.copy(alpha = 0.05f))
+                                    .border(1.dp, GlassTheme.colors.Pink.copy(alpha = 0.2f), RoundedCornerShape(24.dp))
+                                    .padding(20.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text("Gagal mengambil insight", color = GlassTheme.colors.Pink, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                    Text(insightState.message ?: "Terjadi kesalahan", fontSize = 12.sp, color = GlassTheme.colors.TextMuted, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                                }
+                            }
+                            Spacer(Modifier.height(24.dp))
+                        }
+                        is NetworkResult.Success -> {
+                            AiInsightCard(
+                                insight = insightState.data,
+                                onActionClick = { action ->
+                                    viewModel.performAction(action)
+                                },
+                                onApplyTheme = { theme ->
+                                    val themeString = "ai_theme|${theme.primaryHex}|${theme.secondaryHex}|${theme.accentHex}|${theme.backgroundHex}|${theme.name}"
+                                    onThemeChange(themeString)
+                                }
+                            )
+                            Spacer(Modifier.height(24.dp))
+                        }
+                        null -> {}
                     }
 
                     Row(

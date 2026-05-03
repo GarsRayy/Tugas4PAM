@@ -13,15 +13,18 @@ class GeminiService(
     private val client: HttpClient,
     private val apiKey: String
 ) {
+    companion object {
+        // Menggunakan gemini-2.5-flash sesuai permintaan
+        private const val MODEL_NAME = "gemini-2.5-flash"
+        private const val BASE_URL =
+            "https://generativelanguage.googleapis.com/v1beta/models"
+    }
+
     suspend fun generateContent(request: GeminiRequest): NetworkResult<GeminiResponse> {
         return runCatchingNetwork {
-            client.post {
-                url {
-                    protocol = URLProtocol.HTTPS
-                    host = "generativelanguage.googleapis.com"
-                    path("v1beta/models/gemini-2.5-flash:generateContent")
-                    parameters.append("key", apiKey)
-                }
+            // Gunakan full URL string langsung untuk menghindari Ktor encoding ':' menjadi '%3A'
+            val url = "$BASE_URL/$MODEL_NAME:generateContent?key=$apiKey"
+            client.post(url) {
                 contentType(ContentType.Application.Json)
                 setBody(request)
             }.body()

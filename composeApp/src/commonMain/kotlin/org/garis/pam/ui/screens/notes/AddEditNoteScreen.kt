@@ -114,29 +114,50 @@ fun AddEditNoteScreen(
         }
 
         // AI Analysis Overlay
-        if (aiImageAnalysisState is NetworkResult.Loading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(GlassTheme.colors.GlassBg)
-                    .border(1.dp, GlassTheme.colors.GlassBorder, RoundedCornerShape(16.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator(color = GlassTheme.colors.Violet, modifier = Modifier.size(24.dp))
-                    Spacer(Modifier.height(8.dp))
-                    Text("AI sedang menganalisis gambar...", fontSize = 12.sp, color = GlassTheme.colors.TextSecond)
+        when (aiImageAnalysisState) {
+            is NetworkResult.Loading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(GlassTheme.colors.GlassBg)
+                        .border(1.dp, GlassTheme.colors.GlassBorder, RoundedCornerShape(16.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator(color = GlassTheme.colors.Violet, modifier = Modifier.size(24.dp))
+                        Spacer(Modifier.height(8.dp))
+                        Text("AI sedang menganalisis gambar...", fontSize = 12.sp, color = GlassTheme.colors.TextSecond)
+                    }
                 }
             }
-        }
-
-        if (aiImageAnalysisState is NetworkResult.Success) {
-            LaunchedEffect(aiImageAnalysisState) {
-                contentState += "\n\n--- Hasil Smart Capture ---\n" + aiImageAnalysisState.data
-                viewModel.resetAiState()
+            is NetworkResult.Error -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(GlassTheme.colors.Pink.copy(alpha = 0.1f))
+                        .border(1.dp, GlassTheme.colors.Pink.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("Gagal Menganalisis Gambar", color = GlassTheme.colors.Pink, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        Text(aiImageAnalysisState.message ?: "Terjadi kesalahan", fontSize = 12.sp, color = GlassTheme.colors.TextMuted, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                        TextButton(onClick = { viewModel.resetAiState() }) {
+                            Text("Tutup", color = GlassTheme.colors.Pink)
+                        }
+                    }
+                }
             }
+            is NetworkResult.Success -> {
+                LaunchedEffect(aiImageAnalysisState) {
+                    contentState += "\n\n--- Hasil Smart Capture ---\n" + aiImageAnalysisState.data
+                    viewModel.resetAiState()
+                }
+            }
+            else -> {}
         }
 
         Spacer(Modifier.height(8.dp))
