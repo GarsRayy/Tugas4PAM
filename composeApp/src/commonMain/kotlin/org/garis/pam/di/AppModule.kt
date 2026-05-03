@@ -3,6 +3,8 @@ package org.garis.pam.di
 import org.garis.pam.data.local.DatabaseDriverFactory
 import org.garis.pam.data.local.SettingsManager
 import org.garis.pam.data.remote.HttpClientFactory
+import org.garis.pam.data.remote.GeminiService
+import org.garis.pam.data.repository.AiRepository
 import org.garis.pam.data.repository.NewsRepository
 import org.garis.pam.data.repository.NoteRepository
 import org.garis.pam.db.NotesDatabase
@@ -18,6 +20,8 @@ val commonModule = module {
     single { NotesDatabase(get<DatabaseDriverFactory>().createDriver()) }
     single { NoteRepository(get()) }
     single { NewsRepository(HttpClientFactory.create()) }
+    single { GeminiService(HttpClientFactory.create(), "AIzaSyAXA0DzgD-1Wwne95Vn69B3lnWEihPzwic") }
+    single { AiRepository(get()) }
     single { SettingsManager() }
 
     viewModelOf(::NoteViewModel)

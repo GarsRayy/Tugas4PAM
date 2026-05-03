@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import org.garis.pam.data.local.DatabaseDriverFactory
 
 import org.koin.compose.koinInject
 
@@ -17,7 +16,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            App(databaseDriverFactory = koinInject())
+            App()
         }
     }
 }
@@ -25,5 +24,5 @@ class MainActivity : ComponentActivity() {
 @Preview
 @Composable
 fun AppAndroidPreview() {
-    App(databaseDriverFactory = DatabaseDriverFactory(androidx.compose.ui.platform.LocalContext.current))
+    App()
 }

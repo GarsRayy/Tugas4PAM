@@ -31,7 +31,7 @@ kotlin {
         }
     }
     
-    jvm()
+    // jvm()
     
     sourceSets {
         androidMain.dependencies {
@@ -66,6 +66,8 @@ kotlin {
             implementation(libs.coil.network.ktor)
             implementation(libs.compottie)
             implementation(libs.compottie.resources)
+            implementation(libs.peekaboo.ui)
+            implementation(libs.peekaboo.image.picker)
             
             // Koin
             implementation(libs.koin.core)
@@ -79,13 +81,13 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
-        jvmMain.dependencies {
+        /*jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.sqldelight.sqlite.driver)
-        }
+        }*/
     }
 }
 
