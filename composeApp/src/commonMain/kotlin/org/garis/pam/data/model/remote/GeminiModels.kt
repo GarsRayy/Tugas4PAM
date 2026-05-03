@@ -1,12 +1,13 @@
 package org.garis.pam.data.model.remote
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
 data class GeminiRequest(
     val contents: List<Content>,
-    val generationConfig: GenerationConfig? = null,
-    val systemInstruction: Content? = null
+    @SerialName("generation_config") val generationConfig: GenerationConfig? = null,
+    @SerialName("system_instruction") val systemInstruction: Content? = null
 )
 
 @Serializable
@@ -23,7 +24,7 @@ data class Part(
 
 @Serializable
 data class InlineData(
-    val mimeType: String,
+    @SerialName("mime_type") val mimeType: String,
     val data: String
 )
 
@@ -33,22 +34,30 @@ data class GenerationConfig(
     val topK: Int? = 40,
     val topP: Float? = 0.95f,
     val maxOutputTokens: Int? = 2048,
-    val responseMimeType: String? = "application/json"
+    @SerialName("response_mime_type") val responseMimeType: String? = "application/json"
 )
 
 @Serializable
 data class GeminiResponse(
-    val candidates: List<Candidate>,
-    val usageMetadata: UsageMetadata? = null
+    val candidates: List<Candidate>? = null,
+    @SerialName("usage_metadata") val usageMetadata: UsageMetadata? = null,
+    val error: GeminiError? = null
+)
+
+@Serializable
+data class GeminiError(
+    val code: Int? = null,
+    val message: String? = null,
+    val status: String? = null
 )
 
 @Serializable
 data class Candidate(
     val content: Content,
-    val finishReason: String? = null
+    @SerialName("finish_reason") val finishReason: String? = null
 )
 
 @Serializable
 data class UsageMetadata(
-    val totalTokenCount: Int
+    @SerialName("total_token_count") val totalTokenCount: Int
 )

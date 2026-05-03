@@ -1,5 +1,6 @@
 package org.garis.pam.di
 
+import org.garis.pam.core.config.Secrets
 import org.garis.pam.data.local.DatabaseDriverFactory
 import org.garis.pam.data.local.SettingsManager
 import org.garis.pam.data.remote.HttpClientFactory
@@ -20,7 +21,7 @@ val commonModule = module {
     single { NotesDatabase(get<DatabaseDriverFactory>().createDriver()) }
     single { NoteRepository(get()) }
     single { NewsRepository(HttpClientFactory.create()) }
-    single { GeminiService(HttpClientFactory.create(), "AIzaSyAXA0DzgD-1Wwne95Vn69B3lnWEihPzwic") }
+    single { GeminiService(HttpClientFactory.create(), Secrets.GEMINI_API_KEY) }
     single { AiRepository(get()) }
     single { SettingsManager() }
 
