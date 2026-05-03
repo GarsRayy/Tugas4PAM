@@ -14,17 +14,25 @@ import androidx.compose.ui.unit.*
 import org.garis.pam.GlassTheme
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import org.garis.pam.core.network.NetworkResult
 import org.garis.pam.ui.components.GlassTextField
 import org.garis.pam.ui.components.MarkdownText
 import org.garis.pam.viewmodel.NoteViewModel
+import com.preat.peekaboo.image.picker.SelectionMode
+import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
+@OptIn(ExperimentalEncodingApi::class)
 @Composable
 fun AddEditNoteScreen(
     viewModel: NoteViewModel,
     onBack: () -> Unit
 ) {
+    val scope = rememberCoroutineScope()
     val selectedNote by viewModel.selectedNote.collectAsState()
-    
+    val aiImageAnalysisState = viewModel.aiImageAnalysisState
+
     var titleState by remember(selectedNote) { mutableStateOf(selectedNote?.title ?: "") }
     var contentState by remember(selectedNote) { mutableStateOf(selectedNote?.content ?: "") }
     var tagsState by remember(selectedNote) { mutableStateOf(selectedNote?.tags ?: "") }
@@ -33,6 +41,18 @@ fun AddEditNoteScreen(
     var isPreviewMode by remember { mutableStateOf(false) }
 
     val colors = listOf("VIOLET", "TEAL", "PINK", "GOLD", "SKY")
+
+    // Real Image Picker
+    val singleImagePicker = rememberImagePickerLauncher(
+        selectionMode = SelectionMode.Single,
+        scope = scope,
+        onResult = { byteArrays ->
+            byteArrays.firstOrNull()?.let { bytes ->
+                val base64 = Base64.encode(bytes)
+                viewModel.analyzeImage(base64, "image/jpeg")
+            }
+        }
+    )
     
     Column(
         modifier = Modifier
@@ -73,7 +93,50 @@ fun AddEditNoteScreen(
                 color = GlassTheme.colors.TextPrimary
             )
 
-            Spacer(Modifier.size(40.dp))
+            // Smart Capture Button
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .border(1.dp, GlassTheme.colors.GlassBorder, CircleShape)
+                    .background(
+                        Brush.linearGradient(
+                            listOf(GlassTheme.colors.Violet.copy(alpha = 0.3f), GlassTheme.colors.Teal.copy(alpha = 0.3f))
+                        )
+                    )
+                    .clickable { 
+                        singleImagePicker.launch()
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Text("📷", fontSize = 18.sp)
+            }
+        }
+
+        // AI Analysis Overlay
+        if (aiImageAnalysisState is NetworkResult.Loading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(GlassTheme.colors.GlassBg)
+                    .border(1.dp, GlassTheme.colors.GlassBorder, RoundedCornerShape(16.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator(color = GlassTheme.colors.Violet, modifier = Modifier.size(24.dp))
+                    Spacer(Modifier.height(8.dp))
+                    Text("AI sedang menganalisis gambar...", fontSize = 12.sp, color = GlassTheme.colors.TextSecond)
+                }
+            }
+        }
+
+        if (aiImageAnalysisState is NetworkResult.Success) {
+            LaunchedEffect(aiImageAnalysisState) {
+                contentState += "\n\n--- Hasil Smart Capture ---\n" + aiImageAnalysisState.data
+                viewModel.resetAiState()
+            }
         }
 
         Spacer(Modifier.height(8.dp))

@@ -81,6 +81,18 @@ val AuroraGlassColors = GlassColors(
 // ── CompositionLocal supaya GlassTheme bisa diakses dari mana saja ──
 val LocalGlassColors = compositionLocalOf { AuroraGlassColors }
 
+// Helper untuk konversi Hex String ke Color
+fun String.toColor(): Color {
+    val hex = this.replace("#", "")
+    return if (hex.length == 8) {
+        Color(hex.toLong(16))
+    } else if (hex.length == 6) {
+        Color((0xFF000000 or hex.toLong(16)).toInt())
+    } else {
+        Color.White
+    }
+}
+
 // ── Shortcut akses: GlassTheme.colors.Violet dll ──
 object GlassTheme {
     val colors: GlassColors

@@ -4,27 +4,46 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.*
-import androidx.lifecycle.viewmodel.compose.viewModel
-import org.garis.pam.data.local.DatabaseDriverFactory
-import org.garis.pam.data.local.SettingsManager
 import org.garis.pam.navigation.AppNavigation
 import org.koin.compose.koinInject
-import org.garis.pam.viewmodel.NoteViewModel
 import org.garis.pam.viewmodel.ProfileViewModel
 import org.garis.pam.viewmodel.SettingsViewModel
 
 @Composable
-fun App(databaseDriverFactory: DatabaseDriverFactory) {
+fun App() {
     val profileViewModel: ProfileViewModel = koinInject()
     val settingsViewModel: SettingsViewModel = koinInject()
 
     val profileUiState by profileViewModel.uiState.collectAsState()
     val currentTheme by settingsViewModel.currentTheme.collectAsState()
 
-    val glassColors = when (currentTheme) {
-        "light" -> LightGlassColors
-        "dark" -> DarkGlassColors
-        else -> AuroraGlassColors // "aurora_glass" default
+    val glassColors = remember(currentTheme) {
+        if (currentTheme.startsWith("ai_theme|")) {
+            try {
+                val parts = currentTheme.split("|")
+                val primary = parts[1].toColor()
+                val secondary = parts[2].toColor()
+                val accent = parts[3].toColor()
+                val background = parts[4].toColor()
+                
+                DarkGlassColors.copy(
+                    BgPage = background,
+                    BgPhone = background.copy(alpha = 0.9f),
+                    BgHeroTop = primary,
+                    GlassBg = accent.copy(alpha = 0.15f),
+                    GlassBorder = accent.copy(alpha = 0.3f),
+                    TextSecond = secondary
+                )
+            } catch (e: Exception) {
+                AuroraGlassColors
+            }
+        } else {
+            when (currentTheme) {
+                "light" -> LightGlassColors
+                "dark" -> DarkGlassColors
+                else -> AuroraGlassColors
+            }
+        }
     }
 
     val isDark = currentTheme != "light"
@@ -34,12 +53,7 @@ fun App(databaseDriverFactory: DatabaseDriverFactory) {
         MaterialTheme(colorScheme = materialScheme) {
             AppNavigation(
                 profileViewModel = profileViewModel,
-                isDarkMode       = isDark,
-                onToggleDark     = { 
-                    val nextTheme = if (currentTheme == "light") "dark" else "light"
-                    settingsViewModel.changeTheme(nextTheme)
-                },
-                databaseDriverFactory = databaseDriverFactory
+                isDarkMode       = isDark
             )
         }
     }

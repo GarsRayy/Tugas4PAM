@@ -15,9 +15,7 @@ import androidx.compose.ui.unit.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.navigation.*
-import androidx.navigation.NavType
 import androidx.navigation.compose.*
-import androidx.navigation.navArgument
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.graphics.Color
 import org.garis.pam.GlassTheme
@@ -29,22 +27,14 @@ import org.garis.pam.ui.screens.news.NewsListScreen
 import org.garis.pam.ui.screens.news.NewsDetailScreen
 import org.garis.pam.ui.screens.settings.SettingsScreen
 import org.garis.pam.viewmodel.*
-import org.garis.pam.data.local.DatabaseDriverFactory
-import org.garis.pam.data.local.SettingsManager
-import org.garis.pam.data.repository.NoteRepository
-import org.garis.pam.data.repository.NewsRepository
-import org.garis.pam.data.remote.HttpClientFactory
 import org.garis.pam.data.model.Article
-import org.garis.pam.db.*
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun AppNavigation(
     profileViewModel: ProfileViewModel,
-    isDarkMode: Boolean,
-    onToggleDark: () -> Unit,
-    databaseDriverFactory: DatabaseDriverFactory
+    isDarkMode: Boolean
 ) {
     val navController = rememberNavController()
     
@@ -187,6 +177,7 @@ fun AppNavigation(
                     selectedNote?.let {
                         NoteDetailScreen(
                             note             = it,
+                            viewModel        = noteViewModel,
                             sharedTransitionScope = this@SharedTransitionLayout,
                             animatedVisibilityScope = this@composable,
                             onBack           = { navController.popBackStack() },
@@ -199,6 +190,9 @@ fun AppNavigation(
                             onDelete         = { id ->
                                 noteViewModel.deleteNote(id)
                                 navController.popBackStack()
+                            },
+                            onThemeChange    = { themeStr: String ->
+                                settingsViewModel.changeTheme(themeStr)
                             }
                         )
                     }
@@ -311,10 +305,10 @@ fun GlassBottomNav(navController: NavController) {
     ) {
         items.forEach { (route, icon, label) ->
             val isActive = currentRoute == route
-            val scale by androidx.compose.animation.core.animateFloatAsState(
+            val scale by animateFloatAsState(
                 targetValue = if (isActive) 1.08f else 1f,
-                animationSpec = androidx.compose.animation.core.spring(
-                    dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy
                 ),
                 label = "scale_$route"
             )
@@ -366,7 +360,7 @@ fun GlassBottomNav(navController: NavController) {
                     Text(icon, fontSize = 16.sp)
                 }
                 Spacer(Modifier.height(4.dp))
-                val labelColor by androidx.compose.animation.animateColorAsState(
+                val labelColor by animateColorAsState(
                     if (isActive) GlassTheme.colors.Lavender
                     else GlassTheme.colors.TextMuted,
                     label = "labelColor_$route"

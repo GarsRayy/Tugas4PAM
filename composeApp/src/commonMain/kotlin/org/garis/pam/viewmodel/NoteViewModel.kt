@@ -1,13 +1,59 @@
 package org.garis.pam.viewmodel
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import org.garis.pam.core.network.NetworkResult
+import org.garis.pam.data.model.remote.AiInsightResponse
+import org.garis.pam.data.model.remote.AiAction
+import org.garis.pam.data.repository.AiRepository
 import org.garis.pam.data.repository.NoteRepository
 import org.garis.pam.db.NoteEntity
 
-class NoteViewModel(private val repository: NoteRepository) : ViewModel() {
+class NoteViewModel(
+    private val repository: NoteRepository,
+    private val aiRepository: AiRepository
+) : ViewModel() {
+
+    var aiSummaryState by mutableStateOf<NetworkResult<String>?>(null)
+        private set
+
+    var aiInsightState by mutableStateOf<NetworkResult<AiInsightResponse>?>(null)
+        private set
+
+    var aiImageAnalysisState by mutableStateOf<NetworkResult<String>?>(null)
+        private set
+
+    fun analyzeImage(base64Image: String, mimeType: String) {
+        viewModelScope.launch {
+            aiImageAnalysisState = NetworkResult.Loading
+            aiImageAnalysisState = aiRepository.analyzeImage(base64Image, mimeType)
+        }
+    }
+
+    fun summarizeNote(content: String) {
+        viewModelScope.launch {
+            aiSummaryState = NetworkResult.Loading
+            aiSummaryState = aiRepository.summarizeNote(content)
+        }
+    }
+
+    fun getInsights(content: String) {
+        viewModelScope.launch {
+            aiInsightState = NetworkResult.Loading
+            aiInsightState = aiRepository.getNoteInsights(content)
+        }
+    }
+
+    fun resetAiState() {
+        aiSummaryState = null
+        aiInsightState = null
+        aiImageAnalysisState = null
+    }
 
     // Menyimpan state text pencarian dan urutan sortir
     private val _searchQuery = MutableStateFlow("")
@@ -105,6 +151,25 @@ class NoteViewModel(private val repository: NoteRepository) : ViewModel() {
     fun deleteNote(id: Long) {
         viewModelScope.launch {
             repository.deleteNote(id)
+        }
+    }
+
+    fun performAction(action: AiAction) {
+        when (action.type) {
+            "TODO" -> {
+                saveNote(
+                    title = "Tugas: ${action.label}",
+                    content = "- [ ] ${action.value}",
+                    tags = "#todo",
+                    colorName = "GOLD"
+                )
+            }
+            "SEARCH" -> {
+                updateSearchQuery(action.value)
+            }
+            "CALENDAR" -> {
+                // Future implementation: Calendar integration
+            }
         }
     }
 

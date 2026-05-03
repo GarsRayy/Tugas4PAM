@@ -93,17 +93,17 @@ fun NoteCard(
                 Spacer(Modifier.height(6.dp))
                 if (note.tags.isNotBlank()) {
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        note.tags.split(" ").filter { it.startsWith("#") }.take(3).forEach { tag ->
+                        val tags = note.tags.split(" ").filter { it.startsWith("#") }.take(3)
+                        tags.forEach { tag ->
                             Surface(
                                 color = accentColor.copy(alpha = 0.15f),
                                 shape = RoundedCornerShape(4.dp)
                             ) {
                                 Text(
                                     tag,
-                                    fontSize = 9.sp,
+                                    fontSize = 10.sp,
                                     color = accentColor,
-                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
-                                    fontWeight = FontWeight.Bold
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
                                 )
                             }
                         }
