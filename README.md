@@ -140,7 +140,7 @@ Laporan dapat dibuka di: `composeApp/build/reports/kover/htmlDebug/index.html`
 
 | Test Execution (18 Passed) | Code Coverage (>80%) |
 |---|---|
-| ![Test Results] | ![Coverage Report] |
+| ![Test Execution](test_execution.png) | ![Code Coverage](coverage_report.png) |
 
 ---
 
