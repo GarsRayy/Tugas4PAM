@@ -7,73 +7,140 @@
 ![Gemini AI](https://img.shields.io/badge/Gemini_AI-8E75B2?style=for-the-badge&logo=googlebard&logoColor=white)
 ![Ktor](https://img.shields.io/badge/Ktor-0854C7?style=for-the-badge&logo=ktor&logoColor=white)
 
-**Tugas Praktikum Minggu 9 — IF25-22017 Pengembangan Aplikasi Mobile** **Program Studi Teknik Informatika · Institut Teknologi Sumatera**
+**Tugas Praktikum Minggu 10 — IF25-22017 Pengembangan Aplikasi Mobile**  
+Institut Teknologi Sumatera (ITERA) · Teknik Informatika 2026
 
 </div>
 
 ---
 
 ## 👤 Identitas Mahasiswa
-* **Nama**: Garis Rayya Rabbani
-* **NIM**: 123140018
-* **Kelas**: IF25-22017
-* **Mata Kuliah**: Pengembangan Aplikasi Mobile (PAM)
 
----
-
-## 📋 Ringkasan Implementasi
-Pada iterasi ini, aplikasi **Aurora Glass Notes** telah berevolusi menjadi aplikasi cerdas (*AI-powered*) melalui integrasi **Google Gemini API** (Model: `gemini-2.5-flash`). Fitur AI dirancang untuk membantu pengguna mengelola catatan dengan lebih efisien, mulai dari merangkum teks panjang, memberikan *insight* cerdas (termasuk rekomendasi tema UI), hingga menganalisis gambar menggunakan teknologi *Optical Character Recognition* (OCR).
-
----
-
-## 🛠️ Detail Teknis & Kepatuhan Rubrik (Minggu 9)
-
-### 1. AI Integration (Bobot: 30%)
-Aplikasi menggunakan **Google Gemini API** yang diimplementasikan dengan arsitektur *Clean Code* dan pemisahan *layer* yang baik.
-* **`GeminiService`**: Bertindak sebagai *API Client* menggunakan **Ktor** untuk mengirim request HTTP POST ke endpoint Gemini secara *asynchronous*.
-* **`AiRepository`**: Lapisan abstraksi yang mengelola *business logic* untuk 3 fitur utama: `summarizeNote()`, `getNoteInsights()`, dan `analyzeImage()`.
-
-### 2. Prompt Engineering (Bobot: 25%)
-Penerapan *System Prompt* tingkat lanjut (*Advanced Prompt Engineering*) untuk memastikan konsistensi output LLM:
-* **Role & Task definition**: AI diberikan persona spesifik (contoh: *"Anda adalah analis cerdas untuk aplikasi News & Notes"*).
-* **Structured Output (JSON)**: Pada fitur *Insight*, *prompt* dirancang secara ketat (*STRICT JSON*) agar Gemini mengembalikan respons dalam bentuk *Data Model* yang dapat di-*parse* (berisi judul, *key insights*, *actionable items*, dan rekomendasi *HEX color theme*).
-* **Format Cleaning**: Menggunakan regex/string manipulation (`.replace("```json", "")`) untuk membersihkan *Markdown formatting* yang tidak diinginkan dari respons LLM.
-
-### 3. Error Handling (Bobot: 20%)
-Penanganan *error* yang rapi di seluruh lapisan aplikasi:
-* **`NetworkResult` Sealed Class**: Membungkus respons ke dalam 3 *state* aman: `Loading`, `Success`, dan `Error`.
-* **Graceful Degradation**: Jika koneksi gagal atau format JSON dari AI tidak valid, UI tidak akan *crash*, melainkan menampilkan *error state* yang estetik beserta tombol "Coba Lagi" (*retry logic*).
-
-### 4. UI/UX (Bobot: 15%)
-Antarmuka pengguna terintegrasi penuh dengan gaya **Glassmorphism**:
-* **Responsive State**: Penggunaan `CircularProgressIndicator` saat memuat respons AI (*Loading state*).
-* **Interactive UI**: Komponen `AiInsightCard` merender hasil analisis secara dinamis menjadi poin-poin yang mudah dibaca, *chip button* interaktif untuk *Action*, dan tombol aplikasi tema dinamis.
-* **Haptic Feedback**: Menerapkan getaran (*haptic*) saat berinteraksi dengan tombol AI untuk *feedback* fisik yang lebih baik.
-
-### 5. Bonus Points (+10%) 🌟
-* **Image Analysis (Multimodal AI)**: Mengimplementasikan fitur OCR yang memanfaatkan kemampuan *multimodal* Gemini. Pengguna dapat mengunggah/mengirim data gambar (Base64), dan AI akan mengekstrak teks serta mendeskripsikan elemen visual penting di dalam gambar ke dalam format Markdown.
-
----
-
-## 🏗️ Arsitektur Integrasi AI
-
-| Komponen | Deskripsi |
+| | |
 |---|---|
-| `GeminiService.kt` | *Service layer* untuk HTTP Request menggunakan Ktor Client. |
-| `AiRepository.kt` | Menyimpan *System Prompts* dan mengelola konfigurasi LLM (Temperature, MimeType). |
-| `AiInsight.kt` | Data model untuk *parsing* respons JSON terstruktur dari AI (Title, Insights, Actions, Theme). |
-| `NoteViewModel.kt` | *State management* (`StateFlow`) yang menghubungkan UI dengan `AiRepository`. |
-| `NoteDetailScreen.kt` | Komponen UI presentasi (Bottom Sheet & Card) untuk menampilkan respons AI. |
+| **Nama** | Garis Rayya Rabbani |
+| **NIM** | 123140018 |
+| **Kelas** | IF25-22017 |
+| **Kampus** | Institut Teknologi Sumatera (ITERA) |
+| **Email** | garis.123140018@student.itera.ac.id |
 
 ---
 
-## 📸 Screenshots & Demo AI
+## 📋 Deskripsi Aplikasi
 
-*(Tambahkan screenshot atau GIF di sini saat UI AI sedang Loading, Menampilkan Rangkuman, dan Menampilkan Insight Card)*
+**My Profile App** adalah aplikasi profil pribadi yang dibangun menggunakan **Kotlin Compose Multiplatform (KMP)**, dapat berjalan di platform **Android** dan **Desktop** dari satu codebase yang sama.
 
-| AI Summary (Loading & Success) | AI Insight Card & Auto-Theming |
+Aplikasi ini mengimplementasikan fitur catatan (*notes*) dengan integrasi AI, serta sistem pengujian yang komprehensif menggunakan **MockK**, **Turbine**, dan **Kover**.
+
+---
+
+## ✨ Fitur Utama (Minggu 10)
+
+### 🏗️ Koin Dependency Injection (Bobot 20%)
+- **Modularisasi DI**: Memisahkan `commonModule` menjadi `dataModule` (database & repositori) dan `viewModelModule` (semua ViewModel).
+- **Inisialisasi Terpusat**: Penggabungan modul dalam `KoinHelper.kt` dan pembersihan *lifecycle* di `MainApplication.kt`.
+
+### 🧪 Unit Testing & Flow Testing (Bobot 55%)
+- **Clean Code & AAA Pattern**: Penulisan pengujian yang rapi dengan pola *Arrange, Act, Assert*.
+- **NoteRepositoryTest (11 Cases)**: Mencakup CRUD lengkap, fungsi pencarian, dan fitur toggle (arsip, pin, favorit, sembunyi).
+- **NoteViewModelTest (4 Cases)**: Menggunakan **MockK** untuk mengisolasi logika ViewModel dan memverifikasi interaksi dengan repositori.
+- **Flow Testing (Turbine)**: Memastikan aliran data pada `StateFlow` dan `Flow` database berjalan sesuai ekspektasi.
+
+### 🖼️ UI Testing dengan Compose (Bobot 15%)
+- **Test Tags Implementation**: Menambahkan `Modifier.testTag` pada komponen UI kritis untuk selektor yang stabil.
+- **NoteListScreenTest (3 Cases)**: 
+    - Verifikasi *Empty State* ("Kosong") saat data tidak ada.
+    - Verifikasi daftar catatan muncul saat data tersedia.
+    - Verifikasi interaksi tombol tambah (*FloatingActionButton*).
+- **Robolectric Integration**: Menjalankan UI tes di level unit test untuk kecepatan eksekusi.
+
+### 📊 Code Coverage (Bonus +10%)
+- **Kover Integration**: Menggunakan plugin `kotlinx-kover` untuk pemantauan cakupan kode.
+- **Cakupan > 80%**: Fokus pengujian pada lapisan repositori dan ViewModel untuk menjamin integritas logika bisnis.
+
+---
+
+## 🏛 Arsitektur & Struktur Project
+
+```
+composeApp/src/
+├── commonMain/kotlin/org/garis/pam/
+│   ├── 📁 data/
+│   │   ├── 📁 repository/
+│   │   │   ├── NoteRepository.kt
+│   │   │   └── AiRepository.kt
+│   ├── 📁 di/
+│   │   ├── AppModule.kt        # dataModule & viewModelModule
+│   │   └── KoinHelper.kt
+│   ├── 📁 viewmodel/
+│   │   └── NoteViewModel.kt
+│   └── 📁 ui/
+│       └── screens/notes/
+│           └── NoteListScreen.kt # + testTags
+│
+├── androidUnitTest/kotlin/org/garis/pam/
+│   ├── 📁 data/repository/
+│   │   └── NoteRepositoryTest.kt # 11 cases
+│   ├── 📁 viewmodel/
+│   │   └── NoteViewModelTest.kt  # 4 cases
+│   └── 📁 ui/screens/notes/
+│       └── NoteListScreenTest.kt # 3 cases
+```
+
+---
+
+## 🛠️ Cara Menjalankan Test
+
+Karena adanya perbedaan versi JDK pada lingkungan terminal tertentu, disarankan menggunakan JDK dari Android Studio:
+
+### 1. Menjalankan Semua Test
+```bash
+$env:JAVA_HOME = "C:\Program Files\Android\Android Studio1\jbr"; ./gradlew clean :composeApp:testDebugUnitTest
+```
+
+### 2. Menghasilkan Laporan Coverage (HTML)
+```bash
+$env:JAVA_HOME = "C:\Program Files\Android\Android Studio1\jbr"; ./gradlew :composeApp:koverHtmlReportDebug
+```
+Laporan dapat dibuka di: `composeApp/build/reports/kover/htmlDebug/index.html`
+
+---
+
+## 📝 Daftar Test Case
+
+### NoteRepository
+1. `save new note successfully` - AAA Pattern
+2. `get all notes returns list with sort order`
+3. `search notes returns filtered list`
+4. `get favorite notes returns favorites only`
+5. `get archived notes returns archived only`
+6. `get hidden notes returns hidden only`
+7. `toggle pin updates pin status`
+8. `get note detail by id`
+9. `update existing note`
+10. `delete note from database`
+11. `flow getAllNotes emits when new data added` (Turbine)
+
+### NoteViewModel
+1. `notes state collects from repository` (Turbine)
+2. `save note triggers repository insert` (MockK)
+3. `delete note triggers repository delete` (MockK)
+4. `notes state reflects repository changes` (Turbine)
+
+### NoteListScreen (UI)
+1. `displays empty state when no notes`
+2. `displays list when notes available`
+3. `click add button triggers callback`
+
+---
+
+## 📸 Bukti Pengerjaan
+
+
+
+| Test Execution (18 Passed) | Code Coverage (>80%) |
 |---|---|
-| <img width="1440" height="3120" alt="Screenshot_20260503_224704" src="https://github.com/user-attachments/assets/0aca621b-742d-482a-9a29-5b439ddc24ae" /> | <img width="1440" height="3120" alt="Screenshot_20260503_224844" src="https://github.com/user-attachments/assets/7809abaa-d937-497d-b2a9-125ec458b86d" />|
+|  |  |
 
 ---
 
