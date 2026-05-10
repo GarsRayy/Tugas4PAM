@@ -136,7 +136,7 @@ Laporan dapat dibuka di: `composeApp/build/reports/kover/htmlDebug/index.html`
 
 ## 📸 Bukti Pengerjaan
 
-> Silakan lampirkan bukti pengerjaan Anda di bawah ini:
+
 
 | Test Execution (18 Passed) | Code Coverage (>80%) |
 |---|---|
