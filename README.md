@@ -1,11 +1,11 @@
-# 📱 My Profile App — Aurora Glass UI
+# 📓 Aurora Glass Notes App - AI-Powered Features Integration ✨
 
 <div align="center">
 
 ![Kotlin](https://img.shields.io/badge/Kotlin-7C6EFA?style=for-the-badge&logo=kotlin&logoColor=white)
 ![Compose Multiplatform](https://img.shields.io/badge/Compose_Multiplatform-2DD4BF?style=for-the-badge&logo=jetpackcompose&logoColor=white)
-![Android](https://img.shields.io/badge/Android-4ADE80?style=for-the-badge&logo=android&logoColor=white)
-![Desktop](https://img.shields.io/badge/Desktop-38BDF8?style=for-the-badge&logo=windows&logoColor=white)
+![Gemini AI](https://img.shields.io/badge/Gemini_AI-8E75B2?style=for-the-badge&logo=googlebard&logoColor=white)
+![Ktor](https://img.shields.io/badge/Ktor-0854C7?style=for-the-badge&logo=ktor&logoColor=white)
 
 **Tugas Praktikum Minggu 10 — IF25-22017 Pengembangan Aplikasi Mobile**  
 Institut Teknologi Sumatera (ITERA) · Teknik Informatika 2026
@@ -140,13 +140,11 @@ Laporan dapat dibuka di: `composeApp/build/reports/kover/htmlDebug/index.html`
 
 | Test Execution (18 Passed) | Code Coverage (>80%) |
 |---|---|
-| ![Test Execution](test_execution.png) | ![Code Coverage](coverage_report.png) |
+|  |  |
 
 ---
 
-<div align="center">
-
-Dibuat dengan ❤️ menggunakan Kotlin & Compose Multiplatform  
-IF25-22017 · ITERA · 2026
-
-</div>
+## 📚 Referensi Materi
+* **Materi 09**: Integrasi AI API (OpenAI, Gemini, Claude, dan Prompt Engineering) - ITERA.
+* **Google AI for Developers**: [Gemini API Documentation](https://ai.google.dev/docs)
+* **Ktor Client Documentation**: [Ktor](https://ktor.io/docs/)
