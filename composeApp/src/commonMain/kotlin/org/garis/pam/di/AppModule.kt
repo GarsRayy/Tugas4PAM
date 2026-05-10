@@ -17,14 +17,16 @@ import org.koin.compose.viewmodel.dsl.viewModelOf
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
-val commonModule = module {
+val dataModule = module {
     single { NotesDatabase(get<DatabaseDriverFactory>().createDriver()) }
     single { NoteRepository(get()) }
     single { NewsRepository(HttpClientFactory.create()) }
     single { GeminiService(HttpClientFactory.create(), Secrets.GEMINI_API_KEY) }
     single { AiRepository(get()) }
     single { SettingsManager() }
+}
 
+val viewModelModule = module {
     viewModelOf(::NoteViewModel)
     viewModelOf(::SettingsViewModel)
     viewModelOf(::NewsViewModel)

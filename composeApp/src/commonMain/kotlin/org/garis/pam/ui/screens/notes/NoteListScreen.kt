@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.*
 import org.garis.pam.GlassTheme
 import org.garis.pam.db.NoteEntity
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -88,7 +89,7 @@ fun NoteListScreen(
                         "${notes.size} catatan tersimpan",
                         fontSize = 13.sp,
                         color = GlassTheme.colors.TextMuted,
-                        modifier = Modifier.padding(top = 4.dp)
+                        modifier = Modifier.padding(top = 4.dp).testTag("note_count")
                     )
                 }
 
@@ -147,8 +148,22 @@ fun NoteListScreen(
                     top = 4.dp, bottom = 100.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f).testTag("note_list")
             ) {
+                if (notes.isEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier.fillParentMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "Kosong",
+                                color = GlassTheme.colors.TextMuted,
+                                modifier = Modifier.testTag("empty_state_text")
+                            )
+                        }
+                    }
+                }
                 items(notes, key = { it.id }) { note ->
                     with(sharedTransitionScope) {
                         NoteCard(
@@ -170,7 +185,8 @@ fun NoteListScreen(
             onClick = onAddClick,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(end = 20.dp, bottom = 20.dp),
+                .padding(end = 20.dp, bottom = 20.dp)
+                .testTag("add_note_button"),
             shape = RoundedCornerShape(18.dp),
             containerColor = GlassTheme.colors.Violet,
             contentColor = Color.White

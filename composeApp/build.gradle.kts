@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.sqldelight)
+    alias(libs.plugins.kover)
 }
 
 kotlin {
@@ -40,6 +41,20 @@ kotlin {
             implementation(libs.ktor.client.okhttp)
             implementation(libs.sqldelight.android.driver)
             implementation(libs.koin.android)
+        }
+        
+        val androidUnitTest by getting {
+            dependencies {
+                implementation(libs.mockk)
+                implementation(libs.kotlin.test)
+                implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.koin.test)
+                implementation(libs.turbine)
+                implementation(libs.sqldelight.sqlite.driver)
+                implementation(libs.compose.uiTest)
+                implementation(libs.androidx.uiTestManifest)
+                implementation(libs.robolectric)
+            }
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -101,6 +116,13 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+    
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
     }
     packaging {
         resources {
