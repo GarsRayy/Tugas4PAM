@@ -1,152 +1,95 @@
-# 📱 My Profile App — Aurora Glass UI
+# 📱 NoteAI Synesthesia — Sprint 1
+
+![CI](https://github.com/Garis-Rayya-Rabbani/Tugas3_ProfileApp/actions/workflows/ci.yml/badge.svg)
 
 <div align="center">
 
 ![Kotlin](https://img.shields.io/badge/Kotlin-7C6EFA?style=for-the-badge&logo=kotlin&logoColor=white)
 ![Compose Multiplatform](https://img.shields.io/badge/Compose_Multiplatform-2DD4BF?style=for-the-badge&logo=jetpackcompose&logoColor=white)
 ![Android](https://img.shields.io/badge/Android-4ADE80?style=for-the-badge&logo=android&logoColor=white)
-![Desktop](https://img.shields.io/badge/Desktop-38BDF8?style=for-the-badge&logo=windows&logoColor=white)
+![Clean Architecture](https://img.shields.io/badge/Architecture-Clean-red?style=for-the-badge)
 
-**Tugas Praktikum Minggu 10 — IF25-22017 Pengembangan Aplikasi Mobile**  
+**Tugas Project Akhir — IF25-22017 Pengembangan Aplikasi Mobile**  
 Institut Teknologi Sumatera (ITERA) · Teknik Informatika 2026
 
 </div>
 
 ---
 
-## 👤 Identitas Mahasiswa
+## 👥 Identitas Tim
 
-| | |
-|---|---|
-| **Nama** | Garis Rayya Rabbani |
-| **NIM** | 123140018 |
-| **Kelas** | IF25-22017 |
-| **Kampus** | Institut Teknologi Sumatera (ITERA) |
-| **Email** | garis.123140018@student.itera.ac.id |
+| Nama Lengkap | NIM | Peran | GitHub |
+|---|---|---|---|
+| **Garis Rayya Rabbani** | 123140018 | Lead Presentation | [@Garis-Rayya-Rabbani](https://github.com/Garis-Rayya-Rabbani) |
+| **Arya (TBD)** | XXXXXXXX | Lead Data/Domain | [@Username](https://github.com/username) |
 
 ---
 
-## 📋 Deskripsi Aplikasi
+## 📋 Deskripsi Project
 
-**My Profile App** adalah aplikasi profil pribadi yang dibangun menggunakan **Kotlin Compose Multiplatform (KMP)**, dapat berjalan di platform **Android** dan **Desktop** dari satu codebase yang sama.
-
-Aplikasi ini mengimplementasikan fitur catatan (*notes*) dengan integrasi AI, serta sistem pengujian yang komprehensif menggunakan **MockK**, **Turbine**, dan **Kover**.
+**NoteAI Synesthesia** adalah aplikasi manajemen catatan cerdas yang memanfaatkan kecerdasan buatan (Gemini AI) untuk membantu pengguna mengorganisir pikiran mereka. Nama "Synesthesia" merujuk pada fitur unik aplikasi yang secara otomatis memetakan nuansa emosional catatan ke dalam warna visual (Aurora Glass UI), menciptakan pengalaman menulis yang multisensorik.
 
 ---
 
-## ✨ Fitur Utama (Minggu 10)
+## ✨ Fitur & Deliverables Sprint 1
 
-### 🏗️ Koin Dependency Injection (Bobot 20%)
-- **Modularisasi DI**: Memisahkan `commonModule` menjadi `dataModule` (database & repositori) dan `viewModelModule` (semua ViewModel).
-- **Inisialisasi Terpusat**: Penggabungan modul dalam `KoinHelper.kt` dan pembersihan *lifecycle* di `MainApplication.kt`.
+### Fitur Utama (Minimum)
+- [x] **Setup Project KMP**: Struktur folder Multiplatform (Android & iOS/Desktop).
+- [x] **Clean Architecture Implementation**: Pemisahan layer Data, Domain, dan Presentation.
+- [x] **DI with Koin**: Implementasi Dependency Injection modular.
+- [x] **CI/CD Pipeline**: GitHub Actions untuk automated build & test.
+- [x] **Note CRUD**: Dasar penyimpanan catatan dengan SQLDelight.
 
-### 🧪 Unit Testing & Flow Testing (Bobot 55%)
-- **Clean Code & AAA Pattern**: Penulisan pengujian yang rapi dengan pola *Arrange, Act, Assert*.
-- **NoteRepositoryTest (11 Cases)**: Mencakup CRUD lengkap, fungsi pencarian, dan fitur toggle (arsip, pin, favorit, sembunyi).
-- **NoteViewModelTest (4 Cases)**: Menggunakan **MockK** untuk mengisolasi logika ViewModel dan memverifikasi interaksi dengan repositori.
-- **Flow Testing (Turbine)**: Memastikan aliran data pada `StateFlow` dan `Flow` database berjalan sesuai ekspektasi.
-
-### 🖼️ UI Testing dengan Compose (Bobot 15%)
-- **Test Tags Implementation**: Menambahkan `Modifier.testTag` pada komponen UI kritis untuk selektor yang stabil.
-- **NoteListScreenTest (3 Cases)**: 
-    - Verifikasi *Empty State* ("Kosong") saat data tidak ada.
-    - Verifikasi daftar catatan muncul saat data tersedia.
-    - Verifikasi interaksi tombol tambah (*FloatingActionButton*).
-- **Robolectric Integration**: Menjalankan UI tes di level unit test untuk kecepatan eksekusi.
-
-### 📊 Code Coverage (Bonus +10%)
-- **Kover Integration**: Menggunakan plugin `kotlinx-kover` untuk pemantauan cakupan kode.
-- **Cakupan > 80%**: Fokus pengujian pada lapisan repositori dan ViewModel untuk menjamin integritas logika bisnis.
+### Fitur Canggih (Bonus)
+- [ ] **Gemini AI Integration**: Ringkasan otomatis dan analisis sentimen catatan.
+- [ ] **Aurora Glass UI**: Antarmuka berbasis glassmorphism dengan animasi mesh gradient.
+- [ ] **Synesthesia Color Mapping**: Perubahan warna tema berdasarkan isi catatan.
 
 ---
 
-## 🏛 Arsitektur & Struktur Project
+## 🏛 Arsitektur Project
+
+Aplikasi ini menerapkan **Clean Architecture** dengan pola **MVVM**:
 
 ```
-composeApp/src/
-├── commonMain/kotlin/org/garis/pam/
-│   ├── 📁 data/
-│   │   ├── 📁 repository/
-│   │   │   ├── NoteRepository.kt
-│   │   │   └── AiRepository.kt
-│   ├── 📁 di/
-│   │   ├── AppModule.kt        # dataModule & viewModelModule
-│   │   └── KoinHelper.kt
-│   ├── 📁 viewmodel/
-│   │   └── NoteViewModel.kt
-│   └── 📁 ui/
-│       └── screens/notes/
-│           └── NoteListScreen.kt # + testTags
+composeApp/src/commonMain/kotlin/org/garis/pam/
 │
-├── androidUnitTest/kotlin/org/garis/pam/
-│   ├── 📁 data/repository/
-│   │   └── NoteRepositoryTest.kt # 11 cases
-│   ├── 📁 viewmodel/
-│   │   └── NoteViewModelTest.kt  # 4 cases
-│   └── 📁 ui/screens/notes/
-│       └── NoteListScreenTest.kt # 3 cases
+├── 📁 presentation/           # ViewModels, Screens, Components
+├── 📁 domain/                 # Use Cases, Entities, Repository Interfaces
+├── 📁 data/                   # Repository Impl, Local/Remote Data Sources
+├── 📁 di/                     # Koin Modules
+└── 📁 core/                   # Utilities, Network Config, Shared Constants
 ```
+
+- **Data Layer**: Menangani SQLDelight (Local) dan Ktor (Remote).
+- **Domain Layer**: Berisi logika bisnis murni tanpa ketergantungan pada library UI/Framework.
+- **Presentation Layer**: UI deklaratif menggunakan Jetpack Compose.
 
 ---
 
-## 🛠️ Cara Menjalankan Test
+## 🛠️ Tech Stack
 
-Karena adanya perbedaan versi JDK pada lingkungan terminal tertentu, disarankan menggunakan JDK dari Android Studio:
-
-### 1. Menjalankan Semua Test
-```bash
-$env:JAVA_HOME = "C:\Program Files\Android\Android Studio1\jbr"; ./gradlew clean :composeApp:testDebugUnitTest
-```
-
-### 2. Menghasilkan Laporan Coverage (HTML)
-```bash
-$env:JAVA_HOME = "C:\Program Files\Android\Android Studio1\jbr"; ./gradlew :composeApp:koverHtmlReportDebug
-```
-Laporan dapat dibuka di: `composeApp/build/reports/kover/htmlDebug/index.html`
+- **Language**: Kotlin 2.1.0
+- **UI Framework**: Compose Multiplatform
+- **DI**: Koin 4.0.0
+- **Database**: SQLDelight 2.0.1
+- **Networking**: Ktor 3.0.1
+- **Testing**: MockK, Turbine, Kover
+- **CI/CD**: GitHub Actions
 
 ---
 
-## 📝 Daftar Test Case
+## 🚀 Cara Menjalankan
 
-### NoteRepository
-1. `save new note successfully` - AAA Pattern
-2. `get all notes returns list with sort order`
-3. `search notes returns filtered list`
-4. `get favorite notes returns favorites only`
-5. `get archived notes returns archived only`
-6. `get hidden notes returns hidden only`
-7. `toggle pin updates pin status`
-8. `get note detail by id`
-9. `update existing note`
-10. `delete note from database`
-11. `flow getAllNotes emits when new data added` (Turbine)
-
-### NoteViewModel
-1. `notes state collects from repository` (Turbine)
-2. `save note triggers repository insert` (MockK)
-3. `delete note triggers repository delete` (MockK)
-4. `notes state reflects repository changes` (Turbine)
-
-### NoteListScreen (UI)
-1. `displays empty state when no notes`
-2. `displays list when notes available`
-3. `click add button triggers callback`
-
----
-
-## 📸 Bukti Pengerjaan
-
-
-
-| Test Execution (18 Passed) | Code Coverage (>80%) |
-|---|---|
-| ![Test Execution](test_execution.png) | ![Code Coverage](coverage_report.png) |
+1. Clone repository ke branch project: `git checkout project/123140018-NoteAI`.
+2. Buka di Android Studio Hedgehog+.
+3. Gunakan JDK 17 atau 21.
+4. Jalankan `./gradlew test` untuk verifikasi build.
 
 ---
 
 <div align="center">
 
-Dibuat dengan ❤️ menggunakan Kotlin & Compose Multiplatform  
-IF25-22017 · ITERA · 2026
+[📄 Lihat Project Plan Lengkap](PROJECT_PLAN.md)
 
 </div>
