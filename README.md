@@ -142,6 +142,8 @@ Laporan dapat dibuka di: `composeApp/build/reports/kover/htmlDebug/index.html`
 |---|---|
 | <img width="1254" height="579" alt="Cuplikan layar 2026-05-10 181050" src="https://github.com/user-attachments/assets/0ff6e7aa-9124-47ee-9d03-da96e52b5f41" /> | <img width="1365" height="611" alt="Cuplikan layar 2026-05-10 180938" src="https://github.com/user-attachments/assets/15fc016a-1082-43d7-b112-70bb68b20231" /> |
 
+
+Link YT : https://youtu.be/wE5owigoT0s 
 ---
 
 
